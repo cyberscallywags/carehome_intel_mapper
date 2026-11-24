@@ -143,3 +143,39 @@ def test_docs_reference_is_generated_from_the_running_code():
 def test_apps_link_to_the_docs():
     assert httpx.get(f"{API}/site").json()["docs_url"] == DOCS
     assert DOCS in httpx.get(f"{UI}/api/").text
+
+
+# ---------------------------------------------------------------- care homes
+
+
+def test_care_homes_are_stored_in_neo4j_and_searchable():
+    """The API loaded care homes into the graph at start-up (the made-up sample unless
+    data/carehomes.json exists), and the search runs in Neo4j."""
+    everything = httpx.get(f"{API}/carehomes", params={"limit": 1}, timeout=30).json()
+    assert everything["total"] > 0
+    assert everything["dataset"]["count"] == everything["total"]
+    with GraphDatabase.driver(NEO4J_URI, auth=("neo4j", NEO4J_PASSWORD)) as driver:
+        records, _, _ = driver.execute_query("MATCH (c:CareHome) RETURN count(c) AS n")
+    assert records[0]["n"] == everything["total"]
+
+    home = everything["items"][0]
+    word = home["name"].split()[0]
+    outward = home["postcode"].split()[0]
+    for search in (
+        {"name": word.upper()},
+        {"postcode": outward.lower()},
+        {"rating": home["rating"]},
+    ):
+        found = httpx.get(f"{API}/carehomes", params={**search, "limit": 500}, timeout=30).json()
+        assert home["location_id"] in [h["location_id"] for h in found["items"]], search
+    assert httpx.get(f"{API}/carehomes/{home['location_id']}", timeout=30).json() == home
+    assert httpx.get(f"{API}/carehomes", params={"name": "zzzz-no-such-home"}).json()["total"] == 0
+
+
+@pytest.mark.parametrize("base", ["UI", "MOBILE"])
+def test_both_frontends_serve_the_care_home_map(base):
+    """The web UI passes the API's map on at /map/frame; the mobile image proxies it at /api."""
+    url = f"{UI}/map/frame" if base == "UI" else f"{MOBILE}/api/carehomes/map"
+    r = httpx.get(url, params={"focus": "none"}, timeout=60)
+    assert r.status_code == 200
+    assert "Latest CQC rating" in r.text and "markerClusterGroup" in r.text

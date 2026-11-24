@@ -23,6 +23,53 @@ export interface Health {
   neo4j: boolean;
 }
 
+/** One care home registered with the Care Quality Commission (CQC), with its latest overall rating. */
+export interface CareHome {
+  /** CQC location id. */
+  location_id: string;
+  name: string;
+  /** Street address, on one line. */
+  address: string;
+  town: string;
+  county: string;
+  postcode: string;
+  local_authority: string;
+  region: string;
+  latitude: number;
+  longitude: number;
+  /** Latest overall CQC rating. `Not rated` covers every home with no published rating, whatever the reason. */
+  rating: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated';
+  /** When the report behind the rating was published. */
+  rating_published?: string | null;
+  /** Registered care home beds. */
+  beds?: number | null;
+  /** CQC service types, e.g. `Care home service with nursing`. */
+  service_types: string[];
+  phone: string;
+  website: string;
+  provider_id: string;
+  provider_name: string;
+}
+
+/** Where the care home records being served came from. */
+export interface CareHomeDataset {
+  /** `sample` is made-up demonstration data, never real homes. */
+  source: 'sample' | 'cqc-directory' | 'cqc-api';
+  /** File name or API address the records were read from. */
+  name: string;
+  /** Date CQC published the data, when known. */
+  as_of?: string | null;
+  loaded_at: string;
+  count: number;
+}
+
+/** What `GET /carehomes` returns: the homes matching a search, and how many there are in all. */
+export interface CareHomePage {
+  total: number;
+  items: CareHome[];
+  dataset?: CareHomeDataset | null;
+}
+
 /** A signed-in person, as the API and both frontends see them. */
 export interface Member {
   id: string;

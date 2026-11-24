@@ -1,8 +1,13 @@
-# About Example Organisation
+# About Carehome Intel
 
-Describe the organisation behind the project: who you are, why the project exists, and how
-people can take part. This page comes from `brand/docs/about.md`.
+Carehome Intel is a Cyber Scallywags project. It puts the Care Quality Commission's public
+data about care homes in England on a map, so that anyone can see which homes are near them
+and how the regulator rated each one. It is not run by, or endorsed by, the Care Quality
+Commission.
+
+The data is published by CQC under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
 ## Get in touch
 
-- Website: [example.org](https://example.org)
+- Code and issues: [cyberscallywags/carehome_intel_mapper](https://github.com/cyberscallywags/carehome_intel_mapper)

@@ -9,11 +9,19 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app import domain
 from app.agent import Deps, build_agent
 from app.api import auth
 from app.api.auth import CurrentMember
+from app.carehomes import routes as carehomes
+from app.carehomes.store import (
+    CareHomeStore,
+    MemoryCareHomeStore,
+    Neo4jCareHomeStore,
+    load_startup_data,
+)
 from app.config import get_settings
 from app.content import get_site
 from app.db import ItemRepo, ItemStore, MemoryItemRepo, make_driver
@@ -30,6 +38,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if await repo.ping():
         await repo.ensure_schema()
     app.state.repo = repo
+    homes: CareHomeStore = (
+        Neo4jCareHomeStore(driver, settings.neo4j_database) if driver else MemoryCareHomeStore()
+    )
+    await load_startup_data(homes, settings.carehomes_file)
+    app.state.carehomes = homes
     app.state.driver = driver  # app.domain modules store their entities through it
     app.state.agent = build_agent(settings.llm_model)
     yield
@@ -50,7 +63,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=2000)  # the full map is a few megabytes
 app.include_router(auth.router)
+app.include_router(carehomes.router)
 for module in domain.modules():  # entities added with `uv run task new_entity`
     app.include_router(module.router)
 

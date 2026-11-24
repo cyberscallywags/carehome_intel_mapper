@@ -6,7 +6,7 @@
   "appId": "org.cyberscallywags.carehomeintel",
   "brand": {
     "name": "Carehome Intel",
-    "tagline": "Replace this tagline in brand/content/site.json.",
+    "tagline": "Find care homes in England and see how the regulator rates them.",
     "collective": "Cyber Scallywags",
     "collective_url": null
   },

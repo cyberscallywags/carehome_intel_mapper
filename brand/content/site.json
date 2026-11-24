@@ -1,64 +1,55 @@
 {
   "brand": {
-    "tagline": "Replace this tagline in brand/content/site.json.",
+    "tagline": "Find care homes in England and see how the regulator rates them.",
     "collective_url": null
   },
   "welcome": {
     "slug": "welcome",
     "title": "Welcome",
     "icon": "home-outline",
-    "summary": "Plan the application before writing it: what it is for, who uses it, and how it ships.",
+    "summary": "Every care home the Care Quality Commission (CQC) regulates, on one map, with its latest inspection rating.",
     "sections": [
       {
         "kind": "text",
-        "heading": "What we are building",
-        "body": "Describe the application in two sentences. Who is it for, and what will they be able to do that they cannot do today?"
+        "heading": "What this is for",
+        "body": "Choosing a care home is hard, and the facts are spread across spreadsheets and inspection reports. Carehome Intel puts CQC's public data in one place so anyone can see which homes are near them and how each was rated."
       },
       {
         "kind": "steps",
-        "heading": "Planning the application",
+        "heading": "Using the map",
         "items": [
           {
-            "title": "Name the domain",
-            "body": "Replace Item in models.py with the things this project is really about."
+            "title": "Open the map",
+            "body": "Choose Map in the menu. Each marker is a care home, coloured and lettered by its latest overall CQC rating."
           },
           {
-            "title": "Shape the content",
-            "body": "Edit content/site.json: brand, theme colours and the pages in the sidebar."
+            "title": "Search",
+            "body": "Open the search menu and look for a home by name, by location (town, county, council area or region) or by the start of a postcode. You can also keep only the ratings you want."
           },
           {
-            "title": "Design the screens",
-            "body": "Each page is a list of sections (text, list, steps, cards) rendered the same on web and mobile."
-          },
-          {
-            "title": "Ship it",
-            "body": "Merge to main: CI tests every service, then publishes the images."
+            "title": "Read the details",
+            "body": "Hover over a marker for the home's name and rating; select it for the address, beds, type of care, who runs it and a link to its inspection reports on the CQC website."
           }
         ]
       },
       {
         "kind": "cards",
-        "heading": "One contract, every surface",
+        "heading": "About the data",
         "items": [
           {
-            "title": "API",
-            "body": "FastAPI + Pydantic AI. The single source of data and content.",
-            "icon": "server-outline"
+            "title": "From the regulator",
+            "body": "Records come from CQC's monthly care directory or its API. Contains Care Quality Commission data, licensed under the Open Government Licence v3.0.",
+            "icon": "shield-checkmark-outline"
           },
           {
-            "title": "Web",
-            "body": "FastUI pages declared in Python.",
-            "icon": "desktop-outline"
+            "title": "England only",
+            "body": "CQC regulates care in England. Homes in Wales, Scotland and Northern Ireland have their own regulators and are not shown.",
+            "icon": "globe-outline"
           },
           {
-            "title": "Mobile",
-            "body": "Ionic + Angular, packaged with Capacitor.",
-            "icon": "phone-portrait-outline"
-          },
-          {
-            "title": "Graph",
-            "body": "Neo4j holds the project's data.",
-            "icon": "git-network-outline"
+            "title": "A starting point",
+            "body": "A rating is a snapshot from the last published inspection. Read the full report and visit a home before deciding.",
+            "icon": "document-text-outline"
           }
         ]
       }
@@ -75,20 +66,20 @@
           "kind": "steps",
           "items": [
             {
-              "title": "Foundations",
-              "body": "Rename the template, set the brand and theme."
+              "title": "The map",
+              "body": "Care homes on a map, coloured by rating, with search by name, location and postcode on web and mobile."
             },
             {
-              "title": "First feature",
-              "body": "Model one real entity end to end: API, graph, web and mobile."
+              "title": "CQC data models",
+              "body": "Model CQC's location and provider records in full, including the rating for each key question."
             },
             {
-              "title": "Sign-on",
-              "body": "Connect an identity provider and protect the write endpoints."
+              "title": "CQC API",
+              "body": "Keep the records current from CQC's API as well as its monthly spreadsheet."
             },
             {
-              "title": "Release",
-              "body": "Tag v1.0.0 and publish the mobile build."
+              "title": "Reports and recommendations",
+              "body": "Bring in what the inspection reports say, and help people compare homes."
             }
           ]
         }
@@ -127,25 +118,25 @@
     "slug": "about",
     "title": "About",
     "icon": "people-outline",
-    "summary": "Who is behind this project, and how to get in touch.",
+    "summary": "Who is behind Carehome Intel, and where its information comes from.",
     "sections": [
       {
         "kind": "text",
         "heading": "Who we are",
-        "body": "Describe the team or organisation behind the project in a sentence or two."
+        "body": "Carehome Intel is a Cyber Scallywags project. It is not run by, or endorsed by, the Care Quality Commission."
       },
       {
         "kind": "cards",
         "heading": "What we value",
         "items": [
           {
-            "title": "Ship small, ship often",
-            "body": "Every change passes the same gate, from laptop to production.",
-            "icon": "rocket-outline"
+            "title": "Plain facts",
+            "body": "We show what the regulator published, and say when it was published.",
+            "icon": "shield-checkmark-outline"
           },
           {
             "title": "Open by default",
-            "body": "Templates, tests and decisions are written down for the next person.",
+            "body": "The code, tests and decisions are written down for the next person.",
             "icon": "globe-outline"
           }
         ]
@@ -153,7 +144,7 @@
       {
         "kind": "text",
         "heading": "Get in touch",
-        "body": "Say how people can contribute, ask questions or report a problem."
+        "body": "Report a problem or suggest an improvement on the project's GitHub repository, cyberscallywags/carehome_intel_mapper."
       }
     ]
   }

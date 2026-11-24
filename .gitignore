@@ -22,3 +22,7 @@ docs/content/reference/project-metadata.md
 
 # macOS
 .DS_Store
+
+# Care home snapshots written by `uv run task ingest`, and CQC downloads kept beside them
+data/*
+!data/README.md

@@ -29,6 +29,14 @@ class ApiUser(HttpUser):
     def create_item(self) -> None:
         self.client.post("/items", json={"name": f"load-{uuid4().hex[:8]}"})
 
+    @task(3)
+    def search_care_homes(self) -> None:
+        self.client.get("/carehomes?location=london&limit=20", name="/carehomes?location=")
+
+    @task(1)
+    def care_home_map(self) -> None:
+        self.client.get("/carehomes/map?postcode=LS1", name="/carehomes/map?postcode=")
+
     @task(1)
     def health(self) -> None:
         self.client.get("/health")

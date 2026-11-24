@@ -1,7 +1,7 @@
 <!-- The hero and badges are generated from brand/ by `uv run task sync`. -->
 <!-- sync:hero -->
 <p align="center">
-  <img src="docs/content/assets/brand/hero.svg" alt="Example Project: replace this banner with your own" width="100%">
+  <img src="docs/content/assets/brand/hero.svg" alt="Carehome Intel: care homes in England on a map" width="100%">
 </p>
 <!-- /sync:hero -->
 

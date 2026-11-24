@@ -34,7 +34,7 @@ logo = "logo.svg"
 mark = "mark.svg"
 favicon = "favicon.png"
 hero = "hero.svg"
-hero_alt = "Example Project: replace this banner with your own"
+hero_alt = "Carehome Intel: care homes in England on a map"
 
 [docs]
 kicker = "Cyber Scallywags"

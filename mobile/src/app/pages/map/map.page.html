@@ -1,0 +1,126 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Map</ion-title>
+    <ion-buttons slot="end" class="search-toggle">
+      <ion-button
+        (click)="openSearch()"
+        aria-controls="care-home-search"
+        [attr.aria-expanded]="searchOpen()"
+        data-testid="open-search"
+      >
+        <ion-icon slot="start" name="search-outline"></ion-icon>
+        Search
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollY]="false">
+  <div class="layout" [class.open]="searchOpen()">
+    <iframe class="map" title="Map of care homes, coloured by latest CQC rating" [src]="mapUrl()"></iframe>
+
+    <button type="button" class="backdrop" aria-label="Close search" tabindex="-1" (click)="closeSearch()"></button>
+
+    <aside class="search" id="care-home-search" aria-label="Search care homes" data-testid="search-menu">
+      <div class="search-head">
+        <h2>Find a care home</h2>
+        <ion-button class="close" fill="clear" (click)="closeSearch()" aria-label="Close search">
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="search()" role="search">
+        <ion-list inset>
+          <ion-item>
+            <ion-input
+              label="Name"
+              labelPlacement="stacked"
+              placeholder="All or part of the home's name"
+              formControlName="name"
+              [maxlength]="100"
+              enterkeyhint="search"
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input
+              label="Location"
+              labelPlacement="stacked"
+              placeholder="Town, county, council area or region"
+              formControlName="location"
+              [maxlength]="100"
+              autocomplete="address-level2"
+              enterkeyhint="search"
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input
+              label="Postcode"
+              labelPlacement="stacked"
+              placeholder="The start is enough, such as SA73"
+              formControlName="postcode"
+              [maxlength]="10"
+              autocomplete="postal-code"
+              autocapitalize="characters"
+              enterkeyhint="search"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+
+        <ion-list inset formGroupName="ratings">
+          <ion-list-header>Latest CQC rating</ion-list-header>
+          @for (rating of ratings; track rating.name) {
+            <ion-item>
+              <span class="pin" slot="start" aria-hidden="true" [style.background]="rating.colour">{{ rating.initial }}</span>
+              <ion-checkbox [formControlName]="rating.name" justify="space-between">{{ rating.name }}</ion-checkbox>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="ion-padding-horizontal actions">
+          <ion-button type="submit" expand="block" data-testid="search">Search</ion-button>
+          <ion-button type="button" expand="block" fill="clear" (click)="clear()">Clear</ion-button>
+        </div>
+      </form>
+
+      @if (error(); as message) {
+        <ion-text color="danger" role="alert">
+          <p class="ion-padding-horizontal">{{ message }}</p>
+        </ion-text>
+      }
+
+      @if (page(); as found) {
+        <p class="ion-padding-horizontal count" role="status" data-testid="count">
+          {{ found.total }} {{ found.total === 1 ? 'care home' : 'care homes' }}
+        </p>
+        <ion-list inset data-testid="results">
+          @for (home of found.items; track home.location_id) {
+            <ion-item [button]="true" [detail]="false" (click)="show(home)">
+              <span class="pin" slot="start" aria-hidden="true" [style.background]="colour(home.rating)">{{ initial(home.rating) }}</span>
+              <ion-label>
+                <h3>{{ home.name }}</h3>
+                <p>{{ home.town }} {{ home.postcode }} · {{ home.rating }}</p>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+        @if (found.total > found.items.length) {
+          <ion-note class="ion-padding-horizontal note">
+            Showing the first {{ found.items.length }} here; the map shows all {{ found.total }}.
+          </ion-note>
+        }
+        @if (isSample()) {
+          <ion-note class="ion-padding-horizontal note" color="warning" data-testid="sample">
+            Sample data: these homes are made up.
+          </ion-note>
+        } @else {
+          <ion-note class="ion-padding-horizontal note">
+            Contains Care Quality Commission data, licensed under the Open Government Licence v3.0.
+          </ion-note>
+        }
+      }
+    </aside>
+  </div>
+</ion-content>

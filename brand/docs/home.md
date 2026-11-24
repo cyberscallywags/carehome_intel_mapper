@@ -9,11 +9,11 @@ hide:
 
 <div class="brand-hero__text" markdown>
 
-<p class="brand-kicker">Example Organisation · Docs portal</p>
+<p class="brand-kicker">Cyber Scallywags · Docs portal</p>
 
-# Example Project
+# Carehome Intel
 
-Say what the project does and who it is for. This page comes from `brand/docs/home.md`.
+Find care homes in England on a map and see how the Care Quality Commission rates them. These pages are for the people who build and run it.
 
 [Get started](handbook/getting-started.md){ .md-button .md-button--primary }
 [Reference manual](/manual/){ .md-button }

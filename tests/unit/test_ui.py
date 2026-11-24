@@ -2,6 +2,7 @@ import httpx
 import pytest
 
 from app.api.main import app as api_app
+from app.carehomes.store import MemoryCareHomeStore, sample_snapshot
 from app.content import get_site
 from app.meta import get_meta
 from app.ui import main as ui
@@ -11,10 +12,12 @@ from app.ui import main as ui
 async def ui_client(fake_repo, monkeypatch):
     """UI wired to the real API app in-process (API backed by the fake repo)."""
     api_app.state.repo = fake_repo
+    api_app.state.carehomes = MemoryCareHomeStore()
+    await api_app.state.carehomes.replace(sample_snapshot())
     monkeypatch.setattr(
         ui,
         "api",
-        lambda token=None: httpx.AsyncClient(
+        lambda token=None, timeout=10: httpx.AsyncClient(
             transport=httpx.ASGITransport(app=api_app),
             base_url="http://api",
             headers={"Authorization": f"Bearer {token}"} if token else {},
@@ -56,7 +59,7 @@ async def test_static_serves_the_brand_images_sync_copied(ui_client, stem):
 async def test_welcome_renders_the_manifest(ui_client):
     r = await ui_client.get("/api/")
     assert r.status_code == 200
-    assert "Planning the application" in r.text
+    assert "Using the map" in r.text
     # the navbar mirrors the mobile side menu: sidebar pages plus About
     assert "/p/roadmap" in r.text and "/about" in r.text
 
@@ -196,3 +199,57 @@ class TestWebSignOn:
         assert r.json()[0]["event"] == {"url": "/welcome", "type": "go-to"}  # no query: see logout
         assert ui.SESSION_COOKIE not in ui_client.cookies
         assert member.name not in (await ui_client.get("/api/")).text
+
+
+# ---------------------------------------------------------------- care home map
+
+
+async def test_map_page_has_the_search_menu_and_frames_the_map(ui_client):
+    r = await ui_client.get("/map")
+    assert r.status_code == 200
+    for field in ("name", "location", "postcode"):
+        assert f'<input type="text" id="f-{field}" name="{field}"' in r.text
+    assert 'id="search-menu"' in r.text and 'aria-controls="search-menu"' in r.text
+    assert '<iframe title="Map of care homes' in r.text and 'src="/map/frame"' in r.text
+    assert "14 care homes" in r.text
+    assert "these homes are made up" in r.text
+
+
+async def test_map_page_search_fills_the_form_lists_matches_and_frames_the_same_search(ui_client):
+    r = await ui_client.get("/map", params={"location": "london", "rating": "Outstanding"})
+    assert 'name="location" maxlength="100" autocomplete="address-level2" value="london"' in r.text
+    assert 'value="Outstanding" checked' in r.text and 'value="Good" checked' not in r.text
+    assert "1 care home<" in r.text
+    assert "Parkside Lodge (sample)" in r.text and "Kingsmead" not in r.text
+    assert 'src="/map/frame?location=london&amp;rating=Outstanding"' in r.text
+    assert "location=london&amp;rating=Outstanding&amp;focus=SAMPLE-009" in r.text
+
+
+async def test_map_page_escapes_what_was_searched_for(ui_client):
+    r = await ui_client.get("/map", params={"name": '"><script>alert(1)</script>'})
+    assert "<script>alert(1)" not in r.text
+
+
+async def test_map_page_turns_a_bad_search_into_a_400(ui_client):
+    assert (await ui_client.get("/map", params={"rating": "Bad"})).status_code == 400
+    assert (await ui_client.get("/map/frame", params={"rating": "Bad"})).status_code == 400
+
+
+async def test_map_frame_passes_on_the_api_map(ui_client):
+    r = await ui_client.get("/map/frame", params={"postcode": "ls1", "focus": "SAMPLE-004"})
+    assert r.status_code == 200
+    assert "Oak Lodge (sample)" in r.text and "The Willows (sample)" in r.text
+    assert "Harbour View" not in r.text
+
+
+async def test_navbar_map_link_leaves_fastui_for_the_real_page(ui_client):
+    navbar = next(c for c in (await ui_client.get("/api/")).json() if c["type"] == "Navbar")
+    assert {"type": "go-to", "url": "/map"} in [x["onClick"] for x in navbar["startLinks"]]
+    # FastUI then asks for /map's components and is sent to the page itself, on the address
+    # the browser is using even when a proxy in front speaks https.
+    r = await ui_client.get("/api/map")
+    assert r.json() == [{"type": "FireEvent", "event": {"type": "go-to", "url": "http://ui/map"}}]
+    r = await ui_client.get("/api/map", headers={"Referer": "https://ui/about"})
+    assert r.json()[0]["event"]["url"] == "https://ui/map"
+    r = await ui_client.get("/api/map", headers={"Referer": "https://elsewhere.example/"})
+    assert r.json()[0]["event"]["url"] == "http://ui/map"

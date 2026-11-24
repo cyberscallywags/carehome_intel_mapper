@@ -1,0 +1,125 @@
+// The map with the search menu at its end side. Narrow screens: the menu is off-screen until
+// .open slides it over the map. Wide screens (the app's split-pane breakpoint, 992px): the menu
+// is a fixed column and the toggle, close button and backdrop are not needed.
+.layout {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+}
+
+.search {
+  position: absolute;
+  z-index: 20;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(22rem, 90vw);
+  overflow-y: auto;
+  background: var(--ion-background-color, #fff);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.3);
+  transform: translateX(100%);
+  visibility: hidden; // also takes the closed menu out of the tab order
+  transition:
+    transform 0.2s,
+    visibility 0.2s;
+}
+
+:host-context([dir='rtl']) .search {
+  transform: translateX(-100%);
+}
+
+.backdrop {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.layout.open {
+  .search {
+    transform: none;
+    visibility: visible;
+  }
+
+  .backdrop {
+    display: block;
+  }
+}
+
+.search-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.25rem 0 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+  }
+}
+
+@media (min-width: 992px) {
+  .search {
+    position: static;
+    flex: none;
+    transform: none !important;
+    visibility: visible;
+    box-shadow: none;
+    border-inline-start: 1px solid var(--ion-border-color, #d5dbe1);
+  }
+
+  .search-head {
+    padding-block: 1rem 0.5rem;
+  }
+
+  .close,
+  .search-toggle,
+  .layout.open .backdrop {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search {
+    transition: none;
+  }
+}
+
+.pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 0.5rem;
+}
+
+.count {
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.note {
+  display: block;
+  padding-bottom: 12px;
+  font-size: 0.85em;
+}

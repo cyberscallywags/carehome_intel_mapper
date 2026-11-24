@@ -1,6 +1,6 @@
 """Shared Pydantic models: the contract between API, UI, admin and tests."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated, Literal
 from uuid import uuid4
 
@@ -28,6 +28,77 @@ class Health(BaseModel):
     env: str
     storage: Literal["neo4j", "memory"] = "neo4j"
     neo4j: bool
+
+
+# ---------------------------------------------------------------- care homes
+# Read-only records built from the Care Quality Commission's public data (app.carehomes).
+
+Rating = Literal["Outstanding", "Good", "Requires improvement", "Inadequate", "Not rated"]
+RATINGS: tuple[Rating, ...] = (
+    "Outstanding",
+    "Good",
+    "Requires improvement",
+    "Inadequate",
+    "Not rated",
+)
+
+
+class CareHome(BaseModel):
+    """One care home registered with the Care Quality Commission (CQC), with its latest
+    overall rating."""
+
+    location_id: str = Field(description="CQC location id.", examples=["1-1000210669"])
+    name: str
+    address: str = Field("", description="Street address, on one line.")
+    town: str = ""
+    county: str = ""
+    postcode: str = Field("", examples=["SA73 2JA"])
+    local_authority: str = ""
+    region: str = ""
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    rating: Rating = Field(
+        "Not rated",
+        description="Latest overall CQC rating. `Not rated` covers every home with no "
+        "published rating, whatever the reason.",
+    )
+    rating_published: date | None = Field(
+        None, description="When the report behind the rating was published."
+    )
+    beds: int | None = Field(None, ge=0, description="Registered care home beds.")
+    service_types: list[str] = Field(
+        [], description="CQC service types, e.g. `Care home service with nursing`."
+    )
+    phone: str = ""
+    website: str = ""
+    provider_id: str = ""
+    provider_name: str = ""
+
+    @property
+    def cqc_url(self) -> str:
+        """The home's page on the CQC website, with its inspection reports."""
+        return f"https://www.cqc.org.uk/location/{self.location_id}"
+
+
+class CareHomeDataset(BaseModel):
+    """Where the care home records being served came from."""
+
+    source: Literal["sample", "cqc-directory", "cqc-api"] = Field(
+        description="`sample` is made-up demonstration data, never real homes."
+    )
+    name: str = Field(description="File name or API address the records were read from.")
+    as_of: date | None = Field(None, description="Date CQC published the data, when known.")
+    loaded_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    count: int = 0
+
+
+class CareHomePage(BaseModel):
+    """What `GET /carehomes` returns: the homes matching a search, and how many there are in
+    all."""
+
+    total: int
+    items: list[CareHome]
+    dataset: CareHomeDataset | None = None
 
 
 # ---------------------------------------------------------------- sign-on
@@ -88,7 +159,9 @@ HexColour = Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
 Slug = Annotated[str, Field(pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")]
 
 # Routes the frontends own; a content page may not shadow them.
-RESERVED_SLUGS = frozenset({"welcome", "about", "items", "sign-in", "login", "logout", "account"})
+RESERVED_SLUGS = frozenset(
+    {"welcome", "about", "items", "map", "sign-in", "login", "logout", "account"}
+)
 
 
 class Theme(BaseModel):

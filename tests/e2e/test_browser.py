@@ -56,7 +56,7 @@ def test_ui_welcome_renders_the_site_manifest(page: Page, page_errors):
     page.goto(UI)
     expect(page).to_have_title(re.compile(re.escape(site.brand.name)))
     expect(page.get_by_role("heading", name=site.brand.name)).to_be_visible()
-    expect(page.get_by_role("heading", name="Planning the application")).to_be_visible()
+    expect(page.get_by_role("heading", name="Using the map")).to_be_visible()
     page.get_by_role("link", name="About").click()
     expect(page.get_by_role("heading", name=site.about.title)).to_be_visible()
     assert page_errors == []
@@ -166,3 +166,45 @@ def test_admin_shows_healthy_stack(page: Page, demo_admin, demo_password):
     expect(main.get_by_text('"edition":"')).to_be_visible()  # community or enterprise
     expect(page.get_by_test_id("stDataFrame")).to_be_visible()
     expect(page.get_by_test_id("stAlert")).to_have_count(0)
+
+
+# ---------------------------------------------------------------- care home map
+
+
+def test_map_search_menu_narrows_the_map(page: Page, page_errors):
+    page.goto(f"{UI}/map")
+    count = page.get_by_test_id("count")
+    total = int(re.sub(r"\D", "", count.inner_text()))
+    assert total > 0
+    frame = page.frame_locator("iframe")
+    expect(frame.locator(".ch-legend")).to_contain_text("Latest CQC rating")
+    expect(frame.locator(".ch-pin, .marker-cluster").first).to_be_visible()
+
+    first = page.get_by_test_id("results").get_by_role("link").first
+    name = first.inner_text()
+    page.get_by_label("Name").fill(name)
+    page.get_by_role("button", name="Search").click()
+    expect(page).to_have_url(re.compile(r"/map\?.*name="))
+    assert int(re.sub(r"\D", "", count.inner_text())) < total or total == 1
+
+    page.get_by_test_id("results").get_by_role("link", name=name).first.click()
+    expect(page.frame_locator("iframe").locator(".ch-popup")).to_contain_text(name)
+    assert page_errors == []
+
+
+def test_map_search_menu_slides_over_the_map_on_a_phone(page: Page):
+    page.set_viewport_size({"width": 390, "height": 800})
+    page.goto(f"{UI}/map")
+    menu = page.locator("#search-menu")
+    expect(menu).not_to_be_in_viewport()
+    page.get_by_role("button", name="Search").first.click()
+    expect(menu).to_be_in_viewport()
+    page.keyboard.press("Escape")
+    expect(menu).not_to_be_in_viewport()
+
+
+def test_navbar_reaches_the_map(page: Page):
+    page.goto(UI)
+    page.get_by_role("link", name="Map", exact=True).click()
+    expect(page.locator("#search-menu")).to_be_visible()
+    expect(page).to_have_url(f"{UI}/map")

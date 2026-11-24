@@ -9,9 +9,11 @@ so the panel is a Modal opened by a PageEvent)."""
 
 from pathlib import Path
 from typing import Annotated
+from urllib.parse import urlsplit
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastui import AnyComponent, FastUI, prebuilt_html
@@ -23,9 +25,22 @@ from fastui.forms import fastui_form
 from app import domain
 from app.config import get_settings
 from app.meta import get_meta
-from app.models import Brand, ContentPage, Item, ItemIn, LoginIn, Member, Section, Site, Theme
+from app.models import (
+    Brand,
+    CareHomePage,
+    ContentPage,
+    Item,
+    ItemIn,
+    LoginIn,
+    Member,
+    Section,
+    Site,
+    Theme,
+)
+from app.ui import mappage
 
 app = FastAPI(title=f"{get_meta().slug}-ui")
+app.add_middleware(GZipMiddleware, minimum_size=2000)  # the full map is a few megabytes
 
 # The brand's favicon and mark, copied here from brand/images by `uv run task sync`.
 STATIC = Path(__file__).with_name("static")
@@ -40,10 +55,10 @@ def static_file(stem: str) -> str | None:
 SESSION_COOKIE = f"{get_meta().slug}_session"
 
 
-def api(token: str | None = None) -> httpx.AsyncClient:
+def api(token: str | None = None, timeout: float = 10) -> httpx.AsyncClient:
     """A client for the API, sending the member's token when there is one."""
     headers = {"Authorization": f"Bearer {token}"} if token else {}
-    return httpx.AsyncClient(base_url=get_settings().api_url, timeout=10, headers=headers)
+    return httpx.AsyncClient(base_url=get_settings().api_url, timeout=timeout, headers=headers)
 
 
 def session_token(request: Request) -> str | None:
@@ -118,6 +133,7 @@ def shell(
     """Navbar, page and footer around the content; the web twin of the mobile side menu."""
     links = [nav_link(site.welcome.title, "/")]
     links += [nav_link(p.title, f"/p/{p.slug}") for p in site.pages]
+    links.append(nav_link("Map", "/map"))
     links.append(nav_link("Items", "/items"))
     links += [nav_link(module.TITLE, module.PATH) for module in domain.modules()]
     return [
@@ -419,6 +435,58 @@ def add_entity_pages(module) -> None:
 
 for _module in domain.modules():
     add_entity_pages(_module)
+
+
+# ---------------------------------------------------------------- care home map
+# Before the catch-all: /map is a page of its own, and /map/frame passes on the API's map so
+# the browser only ever talks to this server.
+
+
+@app.get("/api/map", response_model=FastUI, response_model_exclude_none=True)
+async def map_redirect(request: Request) -> list[AnyComponent]:
+    """The navbar's Map link asks FastUI for components; answer by loading the real page.
+    FastUI only leaves its single-page app for an absolute address, so build one from the
+    address the browser is on (the Referer), falling back to the one this server sees."""
+    origin = str(request.base_url).rstrip("/")
+    referer = urlsplit(request.headers.get("referer", ""))
+    if referer.scheme in {"http", "https"} and referer.netloc == request.headers.get("host"):
+        origin = f"{referer.scheme}://{referer.netloc}"
+    return [c.FireEvent(event=GoToEvent(url=f"{origin}/map"))]
+
+
+@app.get("/map", response_class=HTMLResponse)
+async def map_page(request: Request) -> HTMLResponse:
+    """The search menu and the map. The search fields are the query string."""
+    params = mappage.search_params(request.query_params.multi_items())
+    try:
+        site = await fetch_site()
+        async with api() as client:
+            resp = await client.get("/carehomes", params=[*params, ("limit", mappage.LISTED)])
+    except httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="The API is not reachable") from None
+    if resp.status_code == 422:
+        raise HTTPException(status_code=400, detail="That search is not valid")
+    resp.raise_for_status()
+    page = CareHomePage.model_validate(resp.json())
+    focus = request.query_params.get("focus", "")
+    return HTMLResponse(mappage.render(site, params, page, static_file("favicon"), focus))
+
+
+@app.get("/map/frame", response_class=HTMLResponse)
+async def map_frame(request: Request) -> HTMLResponse:
+    """The API's Folium map for the same search, plus `focus` to open one home."""
+    params = mappage.search_params(request.query_params.multi_items())
+    if focus := request.query_params.get("focus"):
+        params.append(("focus", focus))
+    try:
+        async with api(timeout=60) as client:  # the whole register takes a moment to draw
+            resp = await client.get("/carehomes/map", params=params)
+    except httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="The API is not reachable") from None
+    if resp.status_code == 422:
+        raise HTTPException(status_code=400, detail="That search is not valid")
+    resp.raise_for_status()
+    return HTMLResponse(resp.text)
 
 
 @app.get("/{path:path}")

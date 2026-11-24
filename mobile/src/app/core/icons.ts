@@ -2,6 +2,7 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   bookOutline,
+  closeOutline,
   desktopOutline,
   documentTextOutline,
   gitNetworkOutline,
@@ -16,6 +17,7 @@ import {
   personCircleOutline,
   phonePortraitOutline,
   rocketOutline,
+  searchOutline,
   serverOutline,
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
@@ -25,6 +27,7 @@ import {
 const ICONS = {
   'add-outline': addOutline,
   'book-outline': bookOutline,
+  'close-outline': closeOutline,
   'desktop-outline': desktopOutline,
   'document-text-outline': documentTextOutline,
   'git-network-outline': gitNetworkOutline,
@@ -39,6 +42,7 @@ const ICONS = {
   'person-circle-outline': personCircleOutline,
   'phone-portrait-outline': phonePortraitOutline,
   'rocket-outline': rocketOutline,
+  'search-outline': searchOutline,
   'server-outline': serverOutline,
   'shield-checkmark-outline': shieldCheckmarkOutline,
 };

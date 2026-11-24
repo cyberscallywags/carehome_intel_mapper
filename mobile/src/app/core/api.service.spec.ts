@@ -44,4 +44,20 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({ name: 'widget' });
     req.flush({ id: '1', name: 'widget', created_at: '2026-01-01T00:00:00Z' });
   });
+
+  it('searches care homes with every filled-in field and each rating', () => {
+    const search = { name: ' ty ', location: '', postcode: 'SA73', ratings: ['Good', 'Outstanding'] as const };
+    api.searchCareHomes({ ...search, ratings: [...search.ratings] }, 20).subscribe();
+    const req = http.expectOne((r) => r.url === `${base}/carehomes`);
+    expect(req.request.params.toString()).toBe('name=ty&postcode=SA73&rating=Good&rating=Outstanding&limit=20');
+    req.flush({ total: 0, items: [] });
+  });
+
+  it('builds the map address for a search and a focused home', () => {
+    const everything = { name: '', location: '', postcode: '', ratings: [] };
+    expect(api.careHomeMapUrl(everything)).toBe(`${base}/carehomes/map`);
+    expect(api.careHomeMapUrl({ ...everything, location: 'Milford Haven' }, '1-101')).toBe(
+      `${base}/carehomes/map?location=Milford%20Haven&focus=1-101`,
+    );
+  });
 });

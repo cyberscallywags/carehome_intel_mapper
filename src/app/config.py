@@ -96,6 +96,7 @@ class Settings(BaseSettings):
         "auth_demo_password",
         "auth_ttl_minutes",
         "auth_allow_mock",
+        "cqc_api_key",
         mode="before",
     )
     @classmethod
@@ -104,6 +105,33 @@ class Settings(BaseSettings):
         if value == "":
             raise PydanticUseDefault
         return value
+
+    carehomes_file: Path = Field(
+        Path("data/carehomes.json"),
+        description=(
+            "Care home snapshot written by `uv run task ingest` and loaded by the API when it "
+            "starts. While the file does not exist the API serves made-up sample homes."
+        ),
+    )
+    cqc_api_url: str = Field(
+        "https://api.service.cqc.org.uk/public/v1",
+        description="Base address of the CQC syndication API (`task ingest --api`).",
+    )
+    cqc_api_key: SecretStr | None = Field(
+        None,
+        description=(
+            "Subscription key from the CQC API portal, sent as `Ocp-Apim-Subscription-Key`. "
+            "Only `task ingest --api` needs it."
+        ),
+    )
+    cqc_partner_code: str = Field(
+        "",
+        description="Optional `partnerCode` CQC asks organisations to add to API requests.",
+    )
+    cqc_data_page: str = Field(
+        "https://www.cqc.org.uk/about-us/transparency/using-cqc-data",
+        description="CQC page that links to the monthly care directory spreadsheet.",
+    )
 
     docs_url: str | None = Field(
         "http://localhost:8200",

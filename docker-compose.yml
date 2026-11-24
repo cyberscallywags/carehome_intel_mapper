@@ -12,6 +12,8 @@ x-app-env: &app-env
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   CORS_ORIGINS: ${CORS_ORIGINS:-[]}
   API_URL: http://api:8000
+  # Care homes: the snapshot `uv run task ingest` writes to ./data, mounted into the api service
+  CAREHOMES_FILE: /data/carehomes.json
   DOCS_URL: ${DOCS_URL:-http://localhost:8200}
   # Sign-on (app.api.auth); unset means brand.toml's [auth] mode and the built-in defaults
   AUTH_MODE: ${AUTH_MODE:-}
@@ -51,6 +53,8 @@ services:
     build: { context: ., dockerfile: docker/Dockerfile, args: { SERVICE: api } }
     environment: *app-env
     ports: ["8000:8000"]
+    volumes:
+      - ./data:/data:ro   # no carehomes.json there yet? The API serves made-up sample homes
     depends_on: { neo4j: { condition: service_healthy } }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

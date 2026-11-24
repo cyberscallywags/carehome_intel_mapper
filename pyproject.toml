@@ -17,6 +17,7 @@ api = [
     "fastapi>=0.120",
     "uvicorn[standard]>=0.38",
     "pydantic-ai-slim>=1.0",
+    "folium>=0.20",
 ]
 ui = [
     "fastapi>=0.120",
