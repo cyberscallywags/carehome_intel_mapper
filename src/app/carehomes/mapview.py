@@ -67,7 +67,11 @@ CALLBACK = """function (row) {
     className: '', iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -12],
     html: '<span class="ch-pin" style="background:' + colour + '">' + initials[rating] + '</span>'
   });
-  var marker = L.marker(new L.LatLng(row[0], row[1]), {icon: pin, title: '', alt: row[3]});
+  var marker = L.marker(new L.LatLng(row[0], row[1]), {icon: pin});
+  marker.on('add', function () {  // a name for screen readers; the pin itself is one letter
+    var el = marker.getElement();
+    if (el) { el.setAttribute('aria-label', row[3] + ', ' + label); }
+  });
   marker.bindTooltip(esc(row[3]) + ' · ' + label, {direction: 'top', offset: [0, -12]});
   marker.bindPopup(function () {
     var html = '<div class="ch-popup"><h3>' + esc(row[3]) + '</h3>' +

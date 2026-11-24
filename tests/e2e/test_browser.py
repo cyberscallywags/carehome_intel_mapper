@@ -56,7 +56,7 @@ def test_ui_welcome_renders_the_site_manifest(page: Page, page_errors):
     page.goto(UI)
     expect(page).to_have_title(re.compile(re.escape(site.brand.name)))
     expect(page.get_by_role("heading", name=site.brand.name)).to_be_visible()
-    expect(page.get_by_role("heading", name="Using the map")).to_be_visible()
+    expect(page.get_by_role("heading", name=get_site().welcome.sections[1].heading)).to_be_visible()
     page.get_by_role("link", name="About").click()
     expect(page.get_by_role("heading", name=site.about.title)).to_be_visible()
     assert page_errors == []
@@ -178,7 +178,7 @@ def test_map_search_menu_narrows_the_map(page: Page, page_errors):
     assert total > 0
     frame = page.frame_locator("iframe")
     expect(frame.locator(".ch-legend")).to_contain_text("Latest CQC rating")
-    expect(frame.locator(".ch-pin, .marker-cluster").first).to_be_visible()
+    expect(frame.locator(".leaflet-marker-icon").first).to_be_visible()
 
     first = page.get_by_test_id("results").get_by_role("link").first
     name = first.inner_text()

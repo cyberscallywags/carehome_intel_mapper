@@ -2,12 +2,16 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from fastapi.responses import HTMLResponse
 
 from app.carehomes import store as storage
+from app.carehomes.cqc_api import CqcApi, CqcApiError
+from app.carehomes.cqc_models import CqcLocation
 from app.carehomes.mapview import render_map
 from app.carehomes.store import CareHomeStore
+from app.config import get_settings
 from app.models import CareHome, CareHomePage, Rating
 
 router = APIRouter(prefix="/carehomes", tags=["care homes"])
@@ -80,3 +84,34 @@ async def get_care_home(location_id: str, store: Store) -> CareHome:
     if (home := await store.get(location_id)) is None:
         raise HTTPException(status_code=404, detail="No care home with that location id")
     return home
+
+
+def get_cqc_api() -> CqcApi:
+    """A client for CQC's API, for the one endpoint that reads it live."""
+    settings = get_settings()
+    if settings.cqc_api_key is None:
+        raise HTTPException(
+            status_code=503, detail="CQC_API_KEY is not set, so CQC's API cannot be asked"
+        )
+    return CqcApi(
+        settings.cqc_api_url, settings.cqc_api_key.get_secret_value(), settings.cqc_partner_code
+    )
+
+
+@router.get("/{location_id}/cqc", response_model=CqcLocation, response_model_by_alias=False)
+async def get_cqc_record(
+    location_id: Annotated[str, Path(pattern=r"^[A-Za-z0-9-]{1,40}$")],
+    cqc: Annotated[CqcApi, Depends(get_cqc_api)],
+) -> CqcLocation:
+    """CQC's full, current record for a location, read from its API as you ask: every rating
+    with its history, the reports, regulated activities and assessments. Needs `CQC_API_KEY`
+    on the server (503 without it)."""
+    try:
+        async with cqc:
+            return await cqc.location(location_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="CQC has no such location") from None
+        raise HTTPException(status_code=502, detail="CQC's API returned an error") from None
+    except CqcApiError, httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="CQC's API could not be read") from None

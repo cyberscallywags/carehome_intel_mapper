@@ -93,6 +93,7 @@ clean = { cmd = "rm -rf .venv .pytest_cache .ruff_cache .coverage coverage.xml h
 dev = { cmd = "python scripts/dev.py", help = "API + web UI with live reload, items in memory: no Docker, no Neo4j" }
 changelog = { cmd = "git-cliff -o CHANGELOG.md", help = "Regenerate CHANGELOG.md from the commit prefixes (cliff.toml)" }
 smoke = { cmd = "python scripts/template_smoke.py", help = "Copy the template, swap in the neutral brand, and check the gate passes with no trace of the old brand" }
+ingest = { cmd = "python -m app.carehomes.ingest", help = "Write data/carehomes.json from CQC's data: task ingest <file.ods> | --download | --api" }
 new_entity = { cmd = "python scripts/new_entity.py", help = "Add an entity to every layer, e.g. task new_entity Volunteer" }
 types = { cmd = "python -m app.typegen", help = "Regenerate the mobile app's TypeScript types from the Pydantic models" }
 sync = { cmd = "python scripts/sync_meta.py", help = "Copy the brand (brand/) into the files that cannot read it, and check it" }

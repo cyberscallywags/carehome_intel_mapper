@@ -14,6 +14,8 @@ x-app-env: &app-env
   API_URL: http://api:8000
   # Care homes: the snapshot `uv run task ingest` writes to ./data, mounted into the api service
   CAREHOMES_FILE: /data/carehomes.json
+  # Only GET /carehomes/{id}/cqc needs the key at run time; `task ingest --api` reads it on the host
+  CQC_API_KEY: ${CQC_API_KEY:-}
   DOCS_URL: ${DOCS_URL:-http://localhost:8200}
   # Sign-on (app.api.auth); unset means brand.toml's [auth] mode and the built-in defaults
   AUTH_MODE: ${AUTH_MODE:-}

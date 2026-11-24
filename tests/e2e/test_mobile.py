@@ -47,7 +47,7 @@ def test_mobile_opens_on_welcome_from_the_site_manifest(page: Page, page_errors)
     expect(page).to_have_title(f"{site.welcome.title} · {site.brand.name}")
     expect(page).to_have_url(re.compile(r"/welcome$"))
     expect(page.get_by_test_id("page-welcome")).to_contain_text(site.brand.name)
-    expect(page.get_by_text("Using the map")).to_be_visible()
+    expect(page.get_by_text(get_site().welcome.sections[1].heading)).to_be_visible()
     # brand colour from GET /site is applied to Ionic's theme
     primary = page.evaluate(
         "getComputedStyle(document.documentElement).getPropertyValue('--ion-color-primary')"
@@ -136,7 +136,7 @@ def test_mobile_blank_submit_writes_nothing(page: Page, demo_member, demo_passwo
 def test_map_page_searches_from_the_side_menu(page: Page, page_errors):
     page.goto(f"{MOBILE}/map")
     frame = page.frame_locator("iframe.map")
-    expect(frame.locator(".ch-pin, .marker-cluster").first).to_be_visible()
+    expect(frame.locator(".leaflet-marker-icon").first).to_be_visible()
     menu = page.get_by_test_id("search-menu")
     expect(menu).not_to_be_in_viewport()
 

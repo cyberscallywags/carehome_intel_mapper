@@ -13,6 +13,7 @@ The Sphinx edition of these docs: the same pages as the [portal](/), plus the
 :maxdepth: 1
 
 project/overview
+project/care-home-data
 ```
 
 % The handbook's cards and toctrees are generated from HANDBOOK in scripts/sync_meta.py.

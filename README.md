@@ -36,6 +36,23 @@ be renamed, re-branded and grown into a real project.
 | `docs` | Zensical portal + Sphinx/Furo manual | http://localhost:8200 |
 | `neo4j` | Neo4j Community (Enterprise optional) | http://localhost:7474 |
 
+## The care home map
+
+Care homes in England on a map, coloured by their latest Care Quality Commission (CQC) rating,
+with a side menu to search by name, location or postcode: the **Map** page of the web UI
+(http://localhost:8080/map) and the **Map** screen of the mobile app
+(http://localhost:8100/map).
+
+```bash
+uv run task dev                          # API + web UI, no Docker; shows made-up sample homes
+uv run task ingest path/to/HSCA_Active_Locations.ods   # load CQC's monthly care directory
+uv run task ingest --api                 # or read CQC's API (needs CQC_API_KEY)
+```
+
+Then restart the API. Where the data comes from, how to get an API key and what each field
+means are in [Care home data](docs/content/project/care-home-data.md). Contains Care Quality
+Commission data, licensed under the Open Government Licence v3.0.
+
 ## Quick start
 
 ```bash

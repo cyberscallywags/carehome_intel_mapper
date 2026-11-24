@@ -31,6 +31,7 @@ nav = [
   { "Home" = "index.md" },
   { "Project" = [
     "project/overview.md",
+    "project/care-home-data.md",
   ] },
   # The Handbook tab is generated from HANDBOOK in scripts/sync_meta.py.
   # sync:handbook

@@ -59,7 +59,7 @@ async def test_static_serves_the_brand_images_sync_copied(ui_client, stem):
 async def test_welcome_renders_the_manifest(ui_client):
     r = await ui_client.get("/api/")
     assert r.status_code == 200
-    assert "Using the map" in r.text
+    assert get_site().welcome.sections[1].heading in r.text
     # the navbar mirrors the mobile side menu: sidebar pages plus About
     assert "/p/roadmap" in r.text and "/about" in r.text
 
