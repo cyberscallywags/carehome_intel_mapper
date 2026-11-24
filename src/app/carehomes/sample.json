@@ -19,7 +19,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Outstanding",
+    "rating_responsive": "Outstanding",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-002",
@@ -41,7 +49,16 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
   },
   {
     "location_id": "SAMPLE-003",
@@ -63,7 +80,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Requires improvement",
+    "rating_effective": "Requires improvement",
+    "rating_caring": "Good",
+    "rating_responsive": "Requires improvement",
+    "rating_well_led": "Requires improvement",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-004",
@@ -85,7 +110,16 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Inadequate",
+    "rating_effective": "Inadequate",
+    "rating_caring": "Inadequate",
+    "rating_responsive": "Inadequate",
+    "rating_well_led": "Inadequate",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
   },
   {
     "location_id": "SAMPLE-005",
@@ -107,7 +141,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-006",
@@ -151,7 +193,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-008",
@@ -173,7 +223,16 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Requires improvement",
+    "rating_effective": "Requires improvement",
+    "rating_caring": "Good",
+    "rating_responsive": "Requires improvement",
+    "rating_well_led": "Requires improvement",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
   },
   {
     "location_id": "SAMPLE-009",
@@ -195,7 +254,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Outstanding",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Outstanding",
+    "rating_responsive": "Good",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-010",
@@ -217,7 +284,16 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
   },
   {
     "location_id": "SAMPLE-011",
@@ -239,7 +315,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-012",
@@ -261,7 +345,16 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Inadequate",
+    "rating_effective": "Inadequate",
+    "rating_caring": "Inadequate",
+    "rating_responsive": "Inadequate",
+    "rating_well_led": "Inadequate",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
   },
   {
     "location_id": "SAMPLE-013",
@@ -283,7 +376,15 @@
     "phone": "",
     "website": "",
     "provider_id": "SAMPLE",
-    "provider_name": "Sample Care Provider (made up)"
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Outstanding",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Good",
+    "rating_responsive": "Outstanding",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
   },
   {
     "location_id": "SAMPLE-014",

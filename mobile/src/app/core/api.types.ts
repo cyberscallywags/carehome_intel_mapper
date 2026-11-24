@@ -23,11 +23,14 @@ export interface Health {
   neo4j: boolean;
 }
 
-/** One care home registered with the Care Quality Commission (CQC), with its latest overall rating. */
+/** One care home registered with the Care Quality Commission (CQC), with its latest ratings. Built from CQC's location record; fields the source does not carry stay empty (the monthly spreadsheet has no key-question ratings or inspection date, the API has both). */
 export interface CareHome {
   /** CQC location id. */
   location_id: string;
   name: string;
+  also_known_as: string;
+  /** The group the home trades under, if any. */
+  brand_name: string;
   /** Street address, on one line. */
   address: string;
   town: string;
@@ -35,16 +38,38 @@ export interface CareHome {
   postcode: string;
   local_authority: string;
   region: string;
+  /** Parliamentary constituency. */
+  constituency: string;
   latitude: number;
   longitude: number;
   /** Latest overall CQC rating. `Not rated` covers every home with no published rating, whatever the reason. */
   rating: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated';
   /** When the report behind the rating was published. */
   rating_published?: string | null;
+  /** Key question: is the home safe? */
+  rating_safe?: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated' | null;
+  /** Key question: is it effective? */
+  rating_effective?: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated' | null;
+  /** Key question: is it caring? */
+  rating_caring?: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated' | null;
+  /** Key question: is it responsive to people's needs? */
+  rating_responsive?: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated' | null;
+  /** Key question: is it well-led? */
+  rating_well_led?: 'Outstanding' | 'Good' | 'Requires improvement' | 'Inadequate' | 'Not rated' | null;
+  /** Date of the last inspection. */
+  last_inspected?: string | null;
+  /** When the home was registered with CQC. */
+  registered?: string | null;
   /** Registered care home beds. */
   beds?: number | null;
+  /** CQC's primary inspection category, e.g. `Residential social care`. */
+  inspection_category: string;
   /** CQC service types, e.g. `Care home service with nursing`. */
   service_types: string[];
+  /** Who the home cares for, e.g. `Dementia`, `Physical disabilities`. */
+  specialisms: string[];
+  /** What the home is registered to do. */
+  regulated_activities: string[];
   phone: string;
   website: string;
   provider_id: string;

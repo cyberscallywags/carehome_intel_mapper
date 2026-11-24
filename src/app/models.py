@@ -43,18 +43,27 @@ RATINGS: tuple[Rating, ...] = (
 )
 
 
+# The five questions CQC asks of every service; each gets its own rating.
+KEY_QUESTIONS = ("Safe", "Effective", "Caring", "Responsive", "Well-led")
+
+
 class CareHome(BaseModel):
     """One care home registered with the Care Quality Commission (CQC), with its latest
-    overall rating."""
+    ratings. Built from CQC's location record; fields the source does not carry stay empty
+    (the monthly spreadsheet has no key-question ratings or inspection date, the API has both).
+    """
 
     location_id: str = Field(description="CQC location id.", examples=["1-1000210669"])
     name: str
+    also_known_as: str = ""
+    brand_name: str = Field("", description="The group the home trades under, if any.")
     address: str = Field("", description="Street address, on one line.")
     town: str = ""
     county: str = ""
     postcode: str = Field("", examples=["SA73 2JA"])
     local_authority: str = ""
     region: str = ""
+    constituency: str = Field("", description="Parliamentary constituency.")
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
     rating: Rating = Field(
@@ -65,14 +74,36 @@ class CareHome(BaseModel):
     rating_published: date | None = Field(
         None, description="When the report behind the rating was published."
     )
+    rating_safe: Rating | None = Field(None, description="Key question: is the home safe?")
+    rating_effective: Rating | None = Field(None, description="Key question: is it effective?")
+    rating_caring: Rating | None = Field(None, description="Key question: is it caring?")
+    rating_responsive: Rating | None = Field(
+        None, description="Key question: is it responsive to people's needs?"
+    )
+    rating_well_led: Rating | None = Field(None, description="Key question: is it well-led?")
+    last_inspected: date | None = Field(None, description="Date of the last inspection.")
+    registered: date | None = Field(None, description="When the home was registered with CQC.")
     beds: int | None = Field(None, ge=0, description="Registered care home beds.")
+    inspection_category: str = Field(
+        "", description="CQC's primary inspection category, e.g. `Residential social care`."
+    )
     service_types: list[str] = Field(
         [], description="CQC service types, e.g. `Care home service with nursing`."
     )
+    specialisms: list[str] = Field(
+        [], description="Who the home cares for, e.g. `Dementia`, `Physical disabilities`."
+    )
+    regulated_activities: list[str] = Field([], description="What the home is registered to do.")
     phone: str = ""
     website: str = ""
     provider_id: str = ""
     provider_name: str = ""
+
+    @property
+    def key_question_ratings(self) -> dict[str, Rating]:
+        """The key questions CQC has rated, in CQC's order: `{"Safe": "Good", ...}`."""
+        rated = {q: getattr(self, f"rating_{q.lower().replace('-', '_')}") for q in KEY_QUESTIONS}
+        return {question: rating for question, rating in rated.items() if rating}
 
     @property
     def cqc_url(self) -> str:

@@ -15,7 +15,7 @@ from folium.plugins import FastMarkerCluster
 from jinja2 import Template
 
 from app.carehomes import ATTRIBUTION, COLOURS, INITIALS
-from app.models import RATINGS, CareHome, CareHomeDataset
+from app.models import KEY_QUESTIONS, RATINGS, CareHome, CareHomeDataset
 
 ENGLAND = (52.8, -1.6)
 TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -34,6 +34,8 @@ STYLE = """<style>
 .ch-popup { font: 14px/1.4 system-ui, sans-serif; min-width: 220px; }
 .ch-popup h3 { font-size: 16px; margin: 0 0 6px; }
 .ch-popup p { margin: 4px 0; }
+.ch-popup ul { list-style: none; margin: 4px 0; padding: 0; }
+.ch-popup li { display: flex; justify-content: space-between; gap: 12px; }
 .ch-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; color: #fff;
   font-weight: 600; }
 .ch-legend, .ch-note { position: fixed; z-index: 1000; background: #fff; color: #111;
@@ -54,6 +56,7 @@ STYLE = """<style>
 # inserted as text (esc), never as markup.
 CALLBACK = """function (row) {
   var colours = %(colours)s, labels = %(labels)s, initials = %(initials)s;
+  var questions = %(questions)s;
   var esc = function (value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
       return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
@@ -70,6 +73,16 @@ CALLBACK = """function (row) {
     var html = '<div class="ch-popup"><h3>' + esc(row[3]) + '</h3>' +
       '<p><span class="ch-badge" style="background:' + colour + '">' + label + '</span></p>';
     if (row[8]) { html += '<p>Report published ' + esc(row[8]) + '</p>'; }
+    if (row[14]) {
+      html += '<ul>';
+      row[14].forEach(function (answer, i) {
+        if (answer >= 0) {
+          html += '<li><span>' + questions[i] + '</span><strong>' + labels[answer] +
+            '</strong></li>';
+        }
+      });
+      html += '</ul>';
+    }
     html += '<p>' + esc(row[4]) + '<br>' + esc(row[5]) + '</p>';
     if (row[6] != null) { html += '<p>Beds: ' + esc(row[6]) + '</p>'; }
     if (row[7]) { html += '<p>' + esc(row[7]) + '</p>'; }
@@ -100,6 +113,7 @@ def js_callback(clear_top: int = 10) -> str:
         "colours": quote(COLOURS[r] for r in RATINGS),
         "labels": quote(RATINGS),
         "initials": quote(INITIALS[r] for r in RATINGS),
+        "questions": quote(KEY_QUESTIONS),
         "clear_top": clear_top,
     }
 
@@ -125,6 +139,7 @@ def row(home: CareHome, real: bool) -> list:
     """One home as the list the browser callback reads, by position."""
     place = ", ".join(part for part in (home.address, home.town, home.county) if part)
     published = home.rating_published.strftime("%-d %B %Y") if home.rating_published else ""
+    answers = home.key_question_ratings
     return [
         round(home.latitude, 6),
         round(home.longitude, 6),
@@ -140,6 +155,9 @@ def row(home: CareHome, real: bool) -> list:
         home.website,
         home.provider_name,
         real,  # link to the CQC website only for real records
+        [RATINGS.index(answers[q]) if q in answers else -1 for q in KEY_QUESTIONS]
+        if answers
+        else None,
     ]
 
 
