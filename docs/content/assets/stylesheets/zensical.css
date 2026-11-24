@@ -1,0 +1,98 @@
+/* Zensical: maps the --brand-* tokens (brand.css) onto the theme. */
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 215;
+  --md-default-bg-color: var(--brand-background);
+  --md-default-fg-color: var(--brand-text);
+  --md-default-fg-color--light: var(--brand-text-muted);
+  --md-default-fg-color--lighter: var(--brand-text-subtle);
+  --md-primary-fg-color: var(--brand-surface);
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: var(--brand-accent-2);
+  --md-typeset-a-color: var(--brand-accent);
+  --md-code-bg-color: var(--brand-card);
+  --md-footer-bg-color: var(--brand-surface);
+  --md-footer-bg-color--dark: var(--brand-background);
+}
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--brand-surface);
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: var(--brand-accent-2-ink);
+  --md-typeset-a-color: var(--brand-accent-ink);
+}
+
+/* Header + tabs: a dark bar with the accent gradient as a rule underneath. */
+.md-header,
+.md-tabs {
+  background-color: var(--brand-surface);
+}
+
+.md-header {
+  border-bottom: 2px solid transparent;
+  border-image: var(--brand-gradient) 1;
+}
+
+.md-header__topic:first-child {
+  font-family: var(--brand-mono);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Headings: gradient h1, accent h2 in dark. */
+.md-typeset h1 {
+  font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradient text would paint the permalink too; the page title needs none. */
+.md-typeset h1 .headerlink {
+  display: none;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h2 {
+  color: var(--brand-accent);
+}
+
+/* Cards and tables on dark surfaces, glowing on hover. */
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) {
+  background: var(--brand-surface);
+  border-color: var(--brand-border);
+}
+
+.md-typeset .grid.cards > ul > li {
+  border-radius: 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: var(--brand-accent);
+  box-shadow: var(--brand-glow);
+}
+
+.md-typeset .md-button {
+  border-radius: 0.5rem;
+  font-weight: 700;
+}
+
+.md-typeset .md-button--primary {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #000;
+}
+
+.md-typeset .md-button--primary:hover {
+  background: var(--brand-accent-2);
+  border-color: var(--brand-accent-2);
+  color: #fff;
+}
+
+/* The hero keeps its own h1 size and spacing. */
+.md-typeset .brand-hero h1 {
+  margin: 0.25rem 0 0.75rem;
+}

@@ -1,0 +1,22 @@
+.git
+.github
+.vscode
+.venv
+**/__pycache__
+.pytest_cache
+.ruff_cache
+tests
+.env*
+# Throwaway/example values only; the docs image documents them (app.docgen)
+!.env.project
+!.env.test
+!.env.production.example
+*.md
+!README.md
+!docs/content/**/*.md
+!brand/docs/*.md
+docs/_build
+docs/.cache
+mobile/node_modules
+mobile/www
+mobile/.angular

@@ -1,0 +1,22 @@
+ion-menu ion-title.brand {
+  cursor: pointer;
+}
+
+ion-menu ion-item.selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.12);
+  --border-color: var(--ion-color-tertiary);
+  --border-width: 0 0 0 3px;
+  --border-style: solid;
+  --color: var(--ion-color-primary);
+  font-weight: 600;
+
+  ion-icon {
+    color: var(--ion-color-primary);
+  }
+}
+
+ion-menu ion-footer ion-note {
+  display: block;
+  padding-bottom: 12px;
+  font-size: 0.8em;
+}

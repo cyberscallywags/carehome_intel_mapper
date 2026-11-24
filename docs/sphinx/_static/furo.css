@@ -1,0 +1,91 @@
+/* Furo: extras beyond the colour variables set in conf.py, all from the --brand-* tokens. */
+
+/* Gradient headline; the rule under the announcement uses the same gradient. */
+.content h1 {
+  font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+body[data-theme="dark"] .content h2 {
+  color: var(--brand-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) .content h2 {
+    color: var(--brand-accent);
+  }
+}
+
+.announcement {
+  border-bottom: 2px solid transparent;
+  border-image: var(--brand-gradient) 1;
+  font-family: var(--brand-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.announcement a {
+  color: var(--brand-accent);
+}
+
+.sidebar-brand-text {
+  font-family: var(--brand-mono);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-logo {
+  max-width: 6rem;
+  border-radius: 50%;
+}
+
+/* sphinx-design cards glow on hover. */
+.sd-card {
+  border-radius: 0.75rem !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sd-card:hover {
+  border-color: var(--brand-accent) !important;
+  box-shadow: var(--brand-glow) !important;
+}
+
+/* Manual home: crest floats right on wide screens, centred above the text on phones. */
+img.brand-crest--float {
+  width: min(100%, 14rem);
+}
+
+@media (min-width: 62em) {
+  img.brand-crest--float {
+    float: right;
+    margin: 0 0 1rem 2rem;
+  }
+}
+
+.content .brand-kicker {
+  margin-bottom: 0.25rem;
+}
+
+/* The announcement wraps on phones instead of running off the edge. */
+.announcement-content {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Mermaid diagrams in the brand colours, matching the portal's. */
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle,
+.mermaid .node path {
+  stroke: var(--brand-accent-2) !important;
+}
+
+body[data-theme="dark"] .mermaid .node rect,
+body[data-theme="dark"] .mermaid .node polygon,
+body[data-theme="dark"] .mermaid .node path {
+  fill: var(--brand-surface) !important;
+}

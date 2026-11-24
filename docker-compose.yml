@@ -1,0 +1,109 @@
+# Test / local stack. Run with:  uv run task up   (uses --env-file .env.project --env-file .env.test)
+# Production overrides live in docker-compose.prod.yml.
+
+x-app-env: &app-env
+  APP_ENV: ${APP_ENV:-test}
+  NEO4J_URI: bolt://neo4j:7687
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: ${NEO4J_PASSWORD:?set NEO4J_PASSWORD}
+  NEO4J_DATABASE: neo4j
+  LLM_MODEL: ${LLM_MODEL:-test}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  CORS_ORIGINS: ${CORS_ORIGINS:-[]}
+  API_URL: http://api:8000
+  DOCS_URL: ${DOCS_URL:-http://localhost:8200}
+  # Sign-on (app.api.auth); unset means brand.toml's [auth] mode and the built-in defaults
+  AUTH_MODE: ${AUTH_MODE:-}
+  AUTH_SECRET: ${AUTH_SECRET:-}
+  AUTH_DEMO_PASSWORD: ${AUTH_DEMO_PASSWORD:-}
+  AUTH_ALLOW_MOCK: ${AUTH_ALLOW_MOCK:-}
+
+x-http-health: &http-health
+  interval: 5s
+  timeout: 3s
+  retries: 20
+
+services:
+  neo4j:
+    image: ${NEO4J_IMAGE:-neo4j:2026.06.0}   # Community, GPLv3; Enterprise is opt-in (see Environments)
+    environment:
+      # Enterprise images only: "eval" (evaluation) or "yes" (a commercial licence)
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: ${NEO4J_LICENSE:-}
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP:-1G}
+      NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE:-512M}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+    networks: [app]
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p '${NEO4J_PASSWORD}' 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  api:
+    image: ${IMAGE_PREFIX:?set in .env.project}/api:${IMAGE_TAG:-local}
+    build: { context: ., dockerfile: docker/Dockerfile, args: { SERVICE: api } }
+    environment: *app-env
+    ports: ["8000:8000"]
+    depends_on: { neo4j: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      <<: *http-health
+    networks: [app]
+
+  ui:
+    image: ${IMAGE_PREFIX:?set in .env.project}/ui:${IMAGE_TAG:-local}
+    build: { context: ., dockerfile: docker/Dockerfile, args: { SERVICE: ui } }
+    environment: *app-env
+    ports: ["8080:8080"]
+    depends_on: { api: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz')"]
+      <<: *http-health
+    networks: [app]
+
+  admin:
+    image: ${IMAGE_PREFIX:?set in .env.project}/admin:${IMAGE_TAG:-local}
+    build: { context: ., dockerfile: docker/Dockerfile, args: { SERVICE: admin } }
+    environment: *app-env
+    ports: ["8501:8501"]
+    depends_on: { api: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      <<: *http-health
+    networks: [app]
+
+  mobile:
+    image: ${IMAGE_PREFIX:?set in .env.project}/mobile:${IMAGE_TAG:-local}
+    build: { context: ., dockerfile: docker/mobile.Dockerfile }   # runs lint + unit tests
+    environment:
+      API_URL: http://api:8000
+    ports: ["8100:8080"]
+    depends_on: { api: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      <<: *http-health
+    networks: [app]
+
+  docs:   # static docs: Zensical portal at /, Sphinx manual at /manual/
+    image: ${IMAGE_PREFIX:?set in .env.project}/docs:${IMAGE_TAG:-local}
+    build: { context: ., dockerfile: docker/docs.Dockerfile }   # fails on any docs warning
+    ports: ["8200:8080"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      <<: *http-health
+    networks: [app]
+
+networks:
+  app:
+    # From brand.toml via .env.project ("<slug>_network"); change the brand, not this file
+    name: ${NETWORK_NAME:?set in .env.project}
+
+volumes:
+  neo4j-data:
