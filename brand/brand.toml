@@ -1,0 +1,52 @@
+# A neutral starting brand (CC0, see LICENSE). Copy this folder over brand/, replace the
+# placeholders and the images, then run `uv run task sync`. Every field is described in the
+# brand kit page of the docs.
+
+[project]
+name = "Carehome Intel"  # display name: titles, app name, docs
+slug = "carehome-intel"  # lower-case: distribution, images, compose project, cache keys
+description = "Find and compare care homes in England on a map, using the Care Quality Commission's public data"
+year = 2026  # copyright year
+
+[organisation]
+name = "Cyber Scallywags"
+url = ""
+motto = ""
+
+[repository]
+owner = "cyberscallywags"
+name = "carehome_intel_mapper"
+
+[mobile]
+app_id = "org.cyberscallywags.carehomeintel"  # Capacitor appId, reverse-DNS, no hyphens
+
+[theme]
+# Sampled from the logo: the pin's deep navy, the teal of its outline, the green of its leaves.
+primary = "#04283a"
+secondary = "#197e89"
+tertiary = "#77c767"
+
+[theme.docs]
+# The logo's brighter aqua and lime on navy surfaces for dark mode, where the teal is too dim.
+scheme = "light"
+accent = "#3fd8cf"
+accent_2 = "#a5de6d"
+accent_ink = "#04283a"
+accent_2_ink = "#197e89"
+background = "#041c2a"
+surface = "#07283a"
+card = "#0b3246"
+border = "#1c4a5e"
+
+[images]
+logo = "logo.png"
+mark = "mark.png"
+favicon = "favicon.png"
+hero = "hero.webp"
+hero_alt = "Carehome Intel: find, explore and compare care homes across England, on a map, with clear ratings from publicly available CQC data"
+
+[docs]
+kicker = "Cyber Scallywags"
+
+[auth]
+mode = "mock"

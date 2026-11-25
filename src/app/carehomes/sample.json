@@ -1,0 +1,411 @@
+[
+  {
+    "location_id": "SAMPLE-001",
+    "name": "Harbour View (sample)",
+    "address": "1 Example Street",
+    "town": "Bristol",
+    "county": "",
+    "postcode": "BS1 9ZZ",
+    "local_authority": "Bristol, City of",
+    "region": "South West",
+    "latitude": 51.4545,
+    "longitude": -2.5879,
+    "rating": "Outstanding",
+    "rating_published": "2025-03-14",
+    "beds": 42,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Outstanding",
+    "rating_responsive": "Outstanding",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-002",
+    "name": "Oak Lodge (sample)",
+    "address": "2 Example Street",
+    "town": "Leeds",
+    "county": "West Yorkshire",
+    "postcode": "LS1 9ZZ",
+    "local_authority": "Leeds",
+    "region": "Yorkshire and The Humber",
+    "latitude": 53.8008,
+    "longitude": -1.5491,
+    "rating": "Good",
+    "rating_published": "2024-11-02",
+    "beds": 60,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-003",
+    "name": "Riverside House (sample)",
+    "address": "3 Example Street",
+    "town": "Newcastle upon Tyne",
+    "county": "Tyne and Wear",
+    "postcode": "NE1 9ZZ",
+    "local_authority": "Newcastle upon Tyne",
+    "region": "North East",
+    "latitude": 54.9783,
+    "longitude": -1.6178,
+    "rating": "Requires improvement",
+    "rating_published": "2025-06-20",
+    "beds": 35,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Requires improvement",
+    "rating_effective": "Requires improvement",
+    "rating_caring": "Good",
+    "rating_responsive": "Requires improvement",
+    "rating_well_led": "Requires improvement",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-004",
+    "name": "The Willows (sample)",
+    "address": "4 Example Street",
+    "town": "Manchester",
+    "county": "Greater Manchester",
+    "postcode": "M1 9ZZ",
+    "local_authority": "Manchester",
+    "region": "North West",
+    "latitude": 53.4808,
+    "longitude": -2.2426,
+    "rating": "Inadequate",
+    "rating_published": "2025-09-05",
+    "beds": 28,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Inadequate",
+    "rating_effective": "Inadequate",
+    "rating_caring": "Inadequate",
+    "rating_responsive": "Inadequate",
+    "rating_well_led": "Inadequate",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-005",
+    "name": "Meadow Court (sample)",
+    "address": "5 Example Street",
+    "town": "Birmingham",
+    "county": "West Midlands",
+    "postcode": "B1 9ZZ",
+    "local_authority": "Birmingham",
+    "region": "West Midlands",
+    "latitude": 52.4862,
+    "longitude": -1.8904,
+    "rating": "Good",
+    "rating_published": "2023-08-17",
+    "beds": 75,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-006",
+    "name": "Cedar Grange (sample)",
+    "address": "6 Example Street",
+    "town": "Nottingham",
+    "county": "Nottinghamshire",
+    "postcode": "NG1 9ZZ",
+    "local_authority": "Nottingham",
+    "region": "East Midlands",
+    "latitude": 52.9548,
+    "longitude": -1.1581,
+    "rating": "Not rated",
+    "rating_published": null,
+    "beds": 20,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)"
+  },
+  {
+    "location_id": "SAMPLE-007",
+    "name": "Abbey Fields (sample)",
+    "address": "7 Example Street",
+    "town": "Norwich",
+    "county": "Norfolk",
+    "postcode": "NR1 9ZZ",
+    "local_authority": "Norfolk",
+    "region": "East of England",
+    "latitude": 52.6309,
+    "longitude": 1.2974,
+    "rating": "Good",
+    "rating_published": "2024-02-29",
+    "beds": 48,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-008",
+    "name": "Kingsmead (sample)",
+    "address": "8 Example Street",
+    "town": "London",
+    "county": "",
+    "postcode": "SE1 9ZZ",
+    "local_authority": "Southwark",
+    "region": "London",
+    "latitude": 51.5033,
+    "longitude": -0.0995,
+    "rating": "Requires improvement",
+    "rating_published": "2025-01-23",
+    "beds": 90,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Requires improvement",
+    "rating_effective": "Requires improvement",
+    "rating_caring": "Good",
+    "rating_responsive": "Requires improvement",
+    "rating_well_led": "Requires improvement",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-009",
+    "name": "Parkside Lodge (sample)",
+    "address": "9 Example Street",
+    "town": "London",
+    "county": "",
+    "postcode": "N1 9ZZ",
+    "local_authority": "Islington",
+    "region": "London",
+    "latitude": 51.5362,
+    "longitude": -0.1033,
+    "rating": "Outstanding",
+    "rating_published": "2024-07-11",
+    "beds": 33,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Outstanding",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Outstanding",
+    "rating_responsive": "Good",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-010",
+    "name": "Seabrook House (sample)",
+    "address": "10 Example Street",
+    "town": "Brighton",
+    "county": "East Sussex",
+    "postcode": "BN1 9ZZ",
+    "local_authority": "Brighton and Hove",
+    "region": "South East",
+    "latitude": 50.8225,
+    "longitude": -0.1372,
+    "rating": "Good",
+    "rating_published": "2025-04-30",
+    "beds": 54,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-011",
+    "name": "Moorland View (sample)",
+    "address": "11 Example Street",
+    "town": "Plymouth",
+    "county": "Devon",
+    "postcode": "PL1 9ZZ",
+    "local_authority": "Plymouth",
+    "region": "South West",
+    "latitude": 50.3755,
+    "longitude": -4.1427,
+    "rating": "Good",
+    "rating_published": "2022-12-09",
+    "beds": 26,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Good",
+    "rating_effective": "Good",
+    "rating_caring": "Good",
+    "rating_responsive": "Good",
+    "rating_well_led": "Good",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-012",
+    "name": "Castle Rise (sample)",
+    "address": "12 Example Street",
+    "town": "Liverpool",
+    "county": "Merseyside",
+    "postcode": "L1 9ZZ",
+    "local_authority": "Liverpool",
+    "region": "North West",
+    "latitude": 53.4084,
+    "longitude": -2.9916,
+    "rating": "Inadequate",
+    "rating_published": "2025-10-16",
+    "beds": 40,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Inadequate",
+    "rating_effective": "Inadequate",
+    "rating_caring": "Inadequate",
+    "rating_responsive": "Inadequate",
+    "rating_well_led": "Inadequate",
+    "specialisms": [
+      "Caring for adults over 65 yrs",
+      "Dementia"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-013",
+    "name": "Orchard House (sample)",
+    "address": "13 Example Street",
+    "town": "Oxford",
+    "county": "Oxfordshire",
+    "postcode": "OX1 9ZZ",
+    "local_authority": "Oxfordshire",
+    "region": "South East",
+    "latitude": 51.752,
+    "longitude": -1.2577,
+    "rating": "Outstanding",
+    "rating_published": "2023-05-05",
+    "beds": 30,
+    "service_types": [
+      "Care home service without nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)",
+    "rating_safe": "Outstanding",
+    "rating_effective": "Outstanding",
+    "rating_caring": "Good",
+    "rating_responsive": "Outstanding",
+    "rating_well_led": "Outstanding",
+    "specialisms": [
+      "Caring for adults over 65 yrs"
+    ]
+  },
+  {
+    "location_id": "SAMPLE-014",
+    "name": "Beacon Court (sample)",
+    "address": "14 Example Street",
+    "town": "Sheffield",
+    "county": "South Yorkshire",
+    "postcode": "S1 9ZZ",
+    "local_authority": "Sheffield",
+    "region": "Yorkshire and The Humber",
+    "latitude": 53.3811,
+    "longitude": -1.4701,
+    "rating": "Not rated",
+    "rating_published": null,
+    "beds": 64,
+    "service_types": [
+      "Care home service with nursing"
+    ],
+    "phone": "",
+    "website": "",
+    "provider_id": "SAMPLE",
+    "provider_name": "Sample Care Provider (made up)"
+  }
+]

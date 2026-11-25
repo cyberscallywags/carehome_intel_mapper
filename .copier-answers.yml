@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier; do not edit by hand.
+_commit: 6691d63
+_src_path: gh:cyberscallywags/sgaffald
+app_id: org.cyberscallywags.carehomeintel
+description: Find and compare care homes in England on a map, using the Care Quality
+    Commission's public data
+github_owner: cyberscallywags
+organisation: CyberScallywags
+organisation_url: ''
+primary_colour: '#264653'
+project_name: Carehome Intel
+project_slug: carehome-intel
+repository: carehome_intel_mapper

@@ -1,0 +1,101 @@
+import httpx
+import pytest
+
+from app.agent import build_agent
+from app.api.auth import demo_members
+from app.api.main import app
+from app.carehomes.store import Query
+from app.config import get_settings
+from app.meta import get_meta
+
+
+@pytest.fixture
+async def client(fake_store):
+    # ASGITransport skips the lifespan, so no Neo4j connection is attempted.
+    app.state.carehomes = fake_store
+    app.state.agent = build_agent("test")
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://api") as c:
+        # Asking the agent needs a member: sign in as the first demo member (tests/unit/test_auth.py
+        # covers sign-on itself).
+        member = demo_members()[0]
+        password = get_settings().auth_demo_password.get_secret_value()
+        login = await c.post("/auth/login", json={"email": member.email, "password": password})
+        c.headers["Authorization"] = f"Bearer {login.json()['token']}"
+        yield c
+
+
+async def test_health_ok(client):
+    r = await client.get("/health")
+    assert r.status_code == 200
+    assert r.json() == {"status": "ok", "env": "test", "storage": "neo4j", "neo4j": True}
+
+
+async def test_health_degraded(client, fake_store):
+    fake_store.healthy = False
+    assert (await client.get("/health")).json()["status"] == "degraded"
+
+
+async def test_ask_answers_from_the_care_home_store(client, fake_store):
+    r = await client.post("/ask", json={"question": "How many care homes are rated Good?"})
+    assert r.status_code == 200
+    # TestModel calls every tool and echoes the results as its answer.
+    answer = r.json()["answer"]
+    total, good = await fake_store.search(Query.of(ratings=["Good"]))
+    assert f'"care_homes":{len(fake_store.homes)}' in answer and f'"Good":{total}' in answer
+    assert '"source":"sample"' in answer
+    assert good and '"homes":[' in answer  # the search tool ran too
+
+
+async def test_ask_rejects_a_blank_question(client):
+    assert (await client.post("/ask", json={"question": ""})).status_code == 422
+
+
+async def test_no_cors_for_unlisted_origin(client):
+    r = await client.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in r.headers
+
+
+async def test_site_serves_the_manifest(client):
+    r = await client.get("/site")
+    assert r.status_code == 200
+    body = r.json()
+    # site.json leaves the name and collective out, so they come from brand.toml
+    assert body["brand"]["name"] == get_meta().name
+    assert body["brand"]["collective"] == get_meta().organisation.name
+    assert body["theme"]["primary"].startswith("#")
+    assert {"welcome", "about", "pages"} <= body.keys()
+
+
+async def test_openapi_identity_comes_from_project_toml(client):
+    info = (await client.get("/openapi.json")).json()["info"]
+    assert info["title"] == f"{get_meta().slug}-api"
+    assert info["version"] == get_meta().version
+
+
+async def test_site_carries_the_docs_url_from_settings(client, monkeypatch):
+    from app.config import get_settings
+
+    assert (await client.get("/site")).json()["docs_url"] == "http://localhost:8200"
+    monkeypatch.setattr(get_settings(), "docs_url", "")
+    assert (await client.get("/site")).json()["docs_url"] is None
+
+
+def test_memory_storage_runs_the_whole_api_without_neo4j(monkeypatch):
+    # TestClient runs the lifespan, which would connect to Neo4j with STORAGE=neo4j.
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setattr(get_settings(), "storage", "memory")
+    with TestClient(app) as c:
+        assert c.get("/health").json() == {
+            "status": "ok",
+            "env": "test",
+            "storage": "memory",
+            "neo4j": False,
+        }
+        # With no snapshot on disk the lifespan loads the made-up sample into memory.
+        homes = c.get("/carehomes", params={"postcode": "LS1"}).json()
+        assert homes["dataset"]["source"] == "sample"
+        assert homes["total"] == len(homes["items"]) > 0
+        home = homes["items"][0]
+        assert c.get(f"/carehomes/{home['location_id']}").json() == home

@@ -1,0 +1,30 @@
+# Weekly, grouped dependency updates. A template is copied many times, so stale pins multiply.
+# Pull requests come from dependabot/... branches (allowed by scripts/check_branch_name.sh) with
+# TASK: commit messages, like any other chore.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule: { interval: weekly }
+    commit-message: { prefix: TASK }
+    groups: { python: { patterns: ["*"] } }
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule: { interval: weekly }
+    commit-message: { prefix: TASK }
+    groups: { mobile: { patterns: ["*"] } }
+    # Angular 22 does not support TypeScript 7 yet (@angular/build's peer range refuses it).
+    # Drop this once an Angular release accepts it.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    commit-message: { prefix: TASK }
+    groups: { actions: { patterns: ["*"] } }
+  - package-ecosystem: docker
+    directory: /docker
+    schedule: { interval: weekly }
+    commit-message: { prefix: TASK }
+    groups: { images: { patterns: ["*"] } }

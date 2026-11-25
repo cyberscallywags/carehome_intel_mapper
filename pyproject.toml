@@ -1,0 +1,151 @@
+[project]
+name = "carehome-intel"
+version = "0.1.0"
+description = "Find and compare care homes in England on a map, using the Care Quality Commission's public data"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.12",
+    "pydantic-settings>=2.11",
+    "neo4j>=6.0",
+    "httpx>=0.28",
+    "pyjwt>=2.10",  # sign-on tokens; app.domain modules use them and the UI reads those modules
+]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.120",
+    "uvicorn[standard]>=0.38",
+    "pydantic-ai-slim>=1.0",
+    "folium>=0.20",
+]
+ui = [
+    "fastapi>=0.120",
+    "uvicorn[standard]>=0.38",
+    "fastui>=0.7",
+    "python-multipart>=0.0.20",
+]
+admin = ["streamlit>=1.50"]
+
+[dependency-groups]
+# Day-to-day work (lint, unit tests, docs) needs only `dev` + `docs`, the default groups.
+# The heavier tools install on demand: `uv sync --group e2e`, or `--all-groups` (task verify).
+dev = [
+    "carehome-intel[api,ui]",
+    "pytest>=8.4",
+    "pytest-asyncio>=1.2",
+    "pytest-cov>=7.0",
+    "ruff>=0.14",
+    "pre-commit>=4.3",
+    "taskipy>=1.14",
+    "watchfiles>=1.1",
+    "git-cliff>=2.10",
+]
+e2e = ["pytest-playwright>=0.10.0"]  # browser tests (task test_e2e)
+load = ["locust>=2.42"]  # load tests (task load)
+admin = ["carehome-intel[admin]"]  # Streamlit, pyarrow and pandas, for running the admin portal locally
+# Documentation: one Markdown source in docs/content, built twice: Sphinx + Furo (reference
+# manual) and Zensical (portal). Kept separate so the docs image installs only these.
+docs = [
+    "carehome-intel[api,ui]",
+    "sphinx>=9.2",
+    "furo>=2025.12.19",
+    "myst-parser>=5.1",
+    "sphinx-design>=0.7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinxcontrib-mermaid>=2.1",
+    "sphinx-autobuild>=2025.8.25",
+    "zensical>=0.0.71",
+    "mkdocstrings-python>=2.0.10",
+    "taskipy>=1.14",  # the docs image runs `task docs`, the same build as local and CI
+]
+
+[tool.uv]
+default-groups = ["dev", "docs"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# The import package is always `app`; the distribution is named after project.slug.
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
+# Installed services (the Docker images) read the brand from inside the package.
+[tool.hatch.build.targets.wheel.force-include]
+"brand/brand.toml" = "app/brand/brand.toml"
+"brand/content" = "app/brand/content"
+
+# ---------------------------------------------------------------- taskipy
+# Test env:   uses .env.test (committed, throwaway secrets)
+# Production: uses .env.production (never committed; copy .env.production.example)
+[tool.taskipy.settings]
+use_vars = true
+
+[tool.taskipy.variables]
+compose_test = "docker compose --env-file .env.project --env-file .env.test"
+compose_prod = "docker compose --env-file .env.project --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml"
+# Portal first (its --clean empties the site dir), then the manual into site/manual.
+docs_build = "python -m app.docgen && zensical build --strict --clean -f docs/zensical.toml && sphinx-build -W --keep-going -q -b html -c docs/sphinx docs/content docs/_build/site/manual"
+
+[tool.taskipy.tasks]
+clean = { cmd = "rm -rf .venv .pytest_cache .ruff_cache .coverage coverage.xml htmlcov docs/_build docs/.cache mobile/node_modules mobile/.angular mobile/www && find . -name __pycache__ -type d -prune -exec rm -rf {} +", help = "Delete every regenerable directory (then uv sync to rebuild .venv)" }
+dev = { cmd = "python scripts/dev.py", help = "API + web UI with live reload, care homes in memory: no Docker, no Neo4j" }
+changelog = { cmd = "git-cliff -o CHANGELOG.md", help = "Regenerate CHANGELOG.md from the commit prefixes (cliff.toml)" }
+smoke = { cmd = "python scripts/template_smoke.py", help = "Copy the template, swap in the neutral brand, and check the gate passes with no trace of the old brand" }
+ingest = { cmd = "python -m app.carehomes.ingest", help = "Write data/carehomes.json from CQC's data: task ingest <file.ods> | --download | --api" }
+new_entity = { cmd = "python scripts/new_entity.py", help = "Add an entity to every layer, e.g. task new_entity Volunteer" }
+types = { cmd = "python -m app.typegen", help = "Regenerate the mobile app's TypeScript types from the Pydantic models" }
+sync = { cmd = "python scripts/sync_meta.py", help = "Copy the brand (brand/) into the files that cannot read it, and check it" }
+lint = { cmd = "ruff check . && ruff format --check .", help = "Ruff lint + format check" }
+format = { cmd = "ruff format . && ruff check --fix .", help = "Auto-format and fix" }
+hooks = { cmd = "pre-commit run --all-files", help = "Run every pre-commit hook" }
+test = { cmd = "pytest -m 'not integration and not e2e'", help = "Unit tests (no services needed)" }
+watch = { cmd = "watchfiles --filter python \"pytest -m 'not integration and not e2e' --no-cov -q\" src tests", help = "Re-run unit tests whenever a .py file in src/ or tests/ changes" }
+test_int ={ cmd = "pytest -m integration --no-cov", help = "Integration tests against the running stack" }
+test_e2e = { cmd = "pytest -m e2e --no-cov", help = "Playwright browser tests of UI, admin + mobile (needs task up and uv sync --group e2e)" }
+docs = { cmd = "{docs_build}", help = "Generate the reference pages and build both docs sites into docs/_build/site" }
+docs_serve = { cmd = "{docs_build} && python -m http.server 8200 -d docs/_build/site", help = "Build, then serve the portal (/) and manual (/manual/) on http://localhost:8200" }
+docs_live = { cmd = "python -m app.docgen && zensical serve -f docs/zensical.toml -a localhost:8201", help = "Live-reload the Zensical portal on :8201 while writing" }
+docs_live_manual = { cmd = "python -m app.docgen && sphinx-autobuild -c docs/sphinx docs/content docs/_build/live-manual --port 8202", help = "Live-reload the Sphinx manual on :8202 while writing" }
+test_mobile = { cmd = "docker build -f docker/mobile.Dockerfile --target test .", help = "Mobile lint + unit tests (in a container, no Node needed)" }
+up = { cmd = "{compose_test} up -d --build --wait", help = "Build + start test stack, wait for healthy" }
+down = { cmd = "{compose_test} down -v", help = "Stop test stack and drop volumes" }
+logs = { cmd = "{compose_test} logs -f", help = "Tail test stack logs" }
+load = { cmd = "locust -f tests/load/locustfile.py --headless -u 10 -r 5 -t 20s --host http://localhost:8000", help = "20s Locust smoke against the API (needs uv sync --group load)" }
+load_ui = { cmd = "locust -f tests/load/locustfile.py --host http://localhost:8000", help = "Locust web UI on :8089 (needs uv sync --group load)" }
+verify = { cmd = "uv sync --all-groups && task lint && task test && task test_mobile && task up && task test_int && task test_e2e && task load; status=$?; task down; exit $status", help = "Full local gate: lint, unit, stack, integration, browser, load" }
+prod_check = { cmd = "{compose_prod} config --quiet && echo 'production config OK'", help = "Validate production compose + .env.production" }
+prod_up = { cmd = "{compose_prod} up -d --wait", help = "Start using released images + production variables" }
+prod_down = { cmd = "{compose_prod} down", help = "Stop production stack (keeps data)" }
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+markers = [
+    "integration: needs the docker compose stack running (task up)",
+    "e2e: Playwright browser tests; needs the stack and `playwright install chromium`",
+]
+addopts = "-ra --strict-markers --cov=app --cov-report=term-missing"
+norecursedirs = ["tests/load"]
+
+[tool.coverage.run]
+omit = ["src/app/admin/*"]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "TD"]
+ignore = [
+    "S101",  # asserts are fine in tests
+    "TD003",  # a TODO need not link an issue; TD still wants `# TODO(name): ...`
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106"]
