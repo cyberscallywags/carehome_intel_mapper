@@ -2,18 +2,15 @@ import httpx
 import pytest
 
 from app.api.main import app as api_app
-from app.carehomes.store import MemoryCareHomeStore, sample_snapshot
 from app.content import get_site
 from app.meta import get_meta
 from app.ui import main as ui
 
 
 @pytest.fixture
-async def ui_client(fake_repo, monkeypatch):
-    """UI wired to the real API app in-process (API backed by the fake repo)."""
-    api_app.state.repo = fake_repo
-    api_app.state.carehomes = MemoryCareHomeStore()
-    await api_app.state.carehomes.replace(sample_snapshot())
+async def ui_client(fake_store, monkeypatch):
+    """UI wired to the real API app in-process (API backed by the sample care homes)."""
+    api_app.state.carehomes = fake_store
     monkeypatch.setattr(
         ui,
         "api",
@@ -75,20 +72,20 @@ async def test_content_page_by_slug(ui_client):
     assert (await ui_client.get("/api/p/nope")).status_code == 404
 
 
-async def test_items_page_lists_items_from_api(ui_client, fake_repo):
-    await api_app.state.repo.create(ui.ItemIn(name="Cwtch"))
-    r = await ui_client.get("/api/items")
-    assert r.status_code == 200
-    assert "Cwtch" in r.text
+async def test_navbar_lists_the_pages_then_the_map(ui_client):
+    navbar = next(c for c in (await ui_client.get("/api/")).json() if c["type"] == "Navbar")
+    urls = [link["onClick"]["url"] for link in navbar["startLinks"]]
+    assert urls == ["/", *(f"/p/{p.slug}" for p in get_site().pages), "/map"]
 
 
-async def test_form_submit_creates_item(ui_client, fake_repo):
-    await signed_in(ui_client)
-    r = await ui_client.post("/api/items", data={"name": "Hiraeth"})
-    assert r.status_code == 200
-    assert [i.name for i in fake_repo.items] == ["Hiraeth"]
-    # GoToEvent must change the URL, or the browser keeps showing the stale table
-    assert r.json()[0]["event"]["query"] == {"added": fake_repo.items[0].id}
+async def test_welcome_opens_on_the_brand_hero(ui_client):
+    [page] = [c for c in (await ui_client.get("/api/")).json() if c["type"] == "Page"]
+    hero = page["components"][0]
+    assert (hero["type"], hero["src"]) == ("Image", ui.static_file("hero"))
+    assert hero["alt"] == get_meta().images["hero_alt"]
+    # only the welcome page: About opens on its heading
+    [about] = [c for c in (await ui_client.get("/api/about")).json() if c["type"] == "Page"]
+    assert about["components"][0]["type"] == "Heading"
 
 
 async def test_navbar_links_to_the_docs_portal(ui_client):
@@ -131,7 +128,7 @@ async def test_sign_on_off_shows_no_account_link(ui_client, monkeypatch):
     r = await ui_client.get("/api/")
     assert '"name":"account"' not in r.text.replace(" ", "")
     assert "Sign in" not in r.text
-    assert "ModelForm" in (await ui_client.get("/api/items")).text  # everyone can add
+    assert "Sign-on is off" in (await ui_client.get("/api/login")).text
 
 
 @pytest.mark.usefixtures("mock_sign_on")
@@ -180,18 +177,6 @@ class TestWebSignOn:
         assert r.status_code == 200
         assert member.name in (await ui_client.get("/api/")).text
         assert (await ui_client.get("/api/login/as/nobody")).status_code == 404
-
-    async def test_only_members_see_the_items_form(self, ui_client):
-        assert "ModelForm" not in (await ui_client.get("/api/items")).text
-        await signed_in(ui_client)
-        assert "ModelForm" in (await ui_client.get("/api/items")).text
-
-    async def test_items_are_added_as_the_signed_in_member(self, ui_client, fake_repo):
-        r = await ui_client.post("/api/items", data={"name": "Anhysbys"})
-        assert r.json()[0]["event"]["url"] == "/login"  # signed out: sent to sign in
-        member = await signed_in(ui_client)
-        await ui_client.post("/api/items", data={"name": "Hiraeth"})
-        assert [(i.name, i.created_by) for i in fake_repo.items] == [("Hiraeth", member.id)]
 
     async def test_signing_out_clears_the_cookie(self, ui_client):
         member = await signed_in(ui_client)

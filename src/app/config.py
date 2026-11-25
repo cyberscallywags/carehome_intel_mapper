@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     storage: Literal["neo4j", "memory"] = Field(
         "neo4j",
         description=(
-            "Where the API keeps items. `memory` needs no database and forgets everything on "
+            "Where the API keeps care homes. `memory` needs no database and forgets everything on "
             "restart: for `uv run task dev` and quick experiments."
         ),
     )

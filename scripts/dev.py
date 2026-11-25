@@ -1,5 +1,5 @@
-"""Run the API and the web UI on this machine with live reload, and no Docker or Neo4j: items
-live in memory (STORAGE=memory) and are gone when you stop. The quickest way to try the
+"""Run the API and the web UI on this machine with live reload, and no Docker or Neo4j: care
+homes live in memory (STORAGE=memory) and are gone when you stop. The quickest way to try the
 template or work on a screen.
 
     uv run task dev        # API on http://localhost:8000/docs, web UI on http://localhost:8080

@@ -2,27 +2,28 @@ from importlib.util import find_spec
 
 import pytest
 
-from app.db import MemoryItemRepo
+from app.carehomes.store import MemoryCareHomeStore, sample_snapshot
 
 # The browser tests import Playwright, which only the `e2e` dependency group installs.
 if find_spec("playwright") is None:
     collect_ignore = ["e2e"]
 
 
-class FakeRepo(MemoryItemRepo):
-    """The in-memory repository, plus a switch to make Neo4j look unreachable."""
+class FakeStore(MemoryCareHomeStore):
+    """The in-memory care home store, plus a switch to make Neo4j look unreachable."""
 
-    def __init__(self, healthy: bool = True) -> None:
-        super().__init__()
-        self.healthy = healthy
+    healthy = True
 
     async def ping(self) -> bool:
         return self.healthy
 
 
 @pytest.fixture
-def fake_repo() -> FakeRepo:
-    return FakeRepo()
+async def fake_store() -> FakeStore:
+    """The made-up sample homes, as the API serves them before any CQC data is loaded."""
+    store = FakeStore()
+    await store.replace(sample_snapshot())
+    return store
 
 
 @pytest.fixture

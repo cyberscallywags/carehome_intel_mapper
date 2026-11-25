@@ -25,12 +25,12 @@ function setup(login = vi.fn(() => of(session()))) {
 describe('SignInPage', () => {
   it('signs in with email and password, then goes back where it came from', () => {
     const { fixture, page, session: s, navigate, login } = setup();
-    fixture.componentRef.setInput('returnUrl', '/items');
+    fixture.componentRef.setInput('returnUrl', '/map');
     page.form.setValue({ email: 'ada@example.org', password: 'demo' });
     page.submit();
     expect(login).toHaveBeenCalledWith('ada@example.org', 'demo');
     expect(s.member()).toEqual(ADA);
-    expect(navigate).toHaveBeenCalledWith('/items');
+    expect(navigate).toHaveBeenCalledWith('/map');
   });
 
   it('lists the demo members, and one fills in its email', () => {
@@ -59,7 +59,7 @@ describe('SignInPage', () => {
   });
 
   it('only returns to paths inside the app', () => {
-    expect(safeReturn('/items')).toBe('/items');
+    expect(safeReturn('/map')).toBe('/map');
     expect(safeReturn('//evil.example')).toBe('/welcome');
     expect(safeReturn('https://evil.example')).toBe('/welcome');
     expect(safeReturn(undefined)).toBe('/welcome');

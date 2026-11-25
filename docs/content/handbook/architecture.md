@@ -44,14 +44,15 @@ flowchart LR
 brand/          the brand: brand.toml, content/site.json, images, docs pages; see Brand kit
 examples/brands/neutral/   a neutral brand to start from
 src/app/
-  api/          FastAPI service (GET /health, /site, /items; POST /items, /ask)
+  api/          FastAPI service (GET /health, /site, /carehomes; POST /ask, /auth/login)
   ui/           FastUI web frontend
   admin/        Streamlit admin portal
   content/      the site manifest loader (the manifest is brand/content/site.json)
   meta.py       reads brand/brand.toml for the services and docs
   models.py     the shared Pydantic contract
   config.py     Settings, from environment variables
-  db.py         item storage: Neo4j, or memory with STORAGE=memory
+  db.py         the Neo4j driver the stores share
+  carehomes/    care homes: CQC readers, the store (Neo4j, or memory with STORAGE=memory), the map
   domain/       entities added with `uv run task new_entity`: models, storage, routes
   agent.py      Pydantic AI agent
   docgen.py     generates the docs reference pages from the code

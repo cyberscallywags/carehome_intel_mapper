@@ -35,8 +35,8 @@ IMAGE_KEYS = ("logo", "mark", "favicon", "hero", "crest", "app_icon", "splash")
 REQUIRED_IMAGES = ("mark", "favicon")
 IMAGE_DIRS: dict[Path, tuple[str, ...]] = {
     DOCS / "assets/brand": IMAGE_KEYS,
-    MOBILE / "src/assets/brand": ("logo", "mark", "favicon", "app_icon", "splash"),
-    Path("src/app/ui/static"): ("mark", "favicon"),
+    MOBILE / "src/assets/brand": ("logo", "mark", "favicon", "hero", "app_icon", "splash"),
+    Path("src/app/ui/static"): ("mark", "favicon", "hero"),
 }
 # The template handbook (docs/content/handbook), in order. task sync writes it into both docs
 # navigations, or leaves it out when brand.toml sets [docs] include_handbook = false.
@@ -426,6 +426,7 @@ def mobile_meta(m: dict, _: str | None) -> str:
     theme = {key: m[key] for key in ("primary", "secondary", "tertiary")}
     if "font_family" in m:
         theme["font_family"] = m["font_family"]
+    hero = published(m, "hero")
     return json_text(
         {
             "_generated": NOTE,
@@ -434,6 +435,9 @@ def mobile_meta(m: dict, _: str | None) -> str:
             "version": m["version"],
             "appId": m["mobile"]["app_id"],
             "brand": m["brand"],
+            "mark": f"assets/brand/{published(m, 'mark')}",
+            "hero": f"assets/brand/{hero}" if hero else None,
+            "hero_alt": m["alt"]["hero"],
             "theme": theme,
         }
     )

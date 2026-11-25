@@ -65,8 +65,11 @@
   h2 {
     margin: 0;
     font-size: 1.15rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
     font-weight: 600;
     color: var(--ion-color-primary);
+    background: color-mix(in srgb, var(--ion-color-tertiary) 30%, #fff);
   }
 }
 

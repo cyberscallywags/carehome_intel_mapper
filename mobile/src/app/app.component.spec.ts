@@ -26,7 +26,7 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.nav().map((e) => e.path)).toEqual([
       '/welcome',
       '/p/roadmap',
-      ...FEATURES.map((f) => f.path), // Items, then any entity added with task new_entity
+      ...FEATURES.map((f) => f.path), // Map, then any entity added with task new_entity
     ]);
     const menu: HTMLElement = fixture.nativeElement.querySelector('[data-testid="menu"]');
     expect(menu.textContent).toContain('Roadmap');

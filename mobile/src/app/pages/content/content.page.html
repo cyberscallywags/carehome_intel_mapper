@@ -12,8 +12,14 @@
 
 <ion-content [fullscreen]="true">
   @if (page(); as page) {
+    @if (page.slug === 'welcome' && hero) {
+      <img class="hero-image" [src]="hero" [alt]="heroAlt" />
+    }
     <header class="hero" [attr.data-testid]="'page-' + page.slug">
       @if (page.slug === 'welcome') {
+        @if (!hero) {
+          <img class="mark" [src]="mark" alt="" />
+        }
         <h1>{{ brand().name }}</h1>
         @if (brand().tagline) {
           <p class="tagline">{{ brand().tagline }}</p>

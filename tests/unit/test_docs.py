@@ -45,8 +45,8 @@ def test_http_api_covers_every_route(pages):
 
 
 def test_http_api_has_runnable_examples(pages):
-    assert '-d \'{"name": "Castell"}\'' in pages["http-api.md"]
-    assert "[Item](models.md#item)" in pages["http-api.md"]
+    assert '-d \'{"question": "Which care homes in Leeds' in pages["http-api.md"]
+    assert "[CareHomePage](models.md#carehomepage)" in pages["http-api.md"]
     # framework schemas have no section on the models page, so they are not links
     assert "`HTTPValidationError`" in pages["http-api.md"]
 
@@ -54,7 +54,7 @@ def test_http_api_has_runnable_examples(pages):
 def test_models_page_lists_every_model_and_constraint(pages):
     for cls in docgen.documented_models():
         assert f"## {cls.__name__}" in pages["models.md"]
-    assert "max length `200`" in pages["models.md"]
+    assert "max length `2000`" in pages["models.md"]
     assert "pattern `^#[0-9a-fA-F]{6}$`" in pages["models.md"]
 
 

@@ -4,18 +4,19 @@ import pytest
 from app.agent import build_agent
 from app.api.auth import demo_members
 from app.api.main import app
+from app.carehomes.store import Query
 from app.config import get_settings
 from app.meta import get_meta
 
 
 @pytest.fixture
-async def client(fake_repo):
+async def client(fake_store):
     # ASGITransport skips the lifespan, so no Neo4j connection is attempted.
-    app.state.repo = fake_repo
+    app.state.carehomes = fake_store
     app.state.agent = build_agent("test")
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://api") as c:
-        # Writes need a member: sign in as the first demo member (tests/unit/test_auth.py
+        # Asking the agent needs a member: sign in as the first demo member (tests/unit/test_auth.py
         # covers sign-on itself).
         member = demo_members()[0]
         password = get_settings().auth_demo_password.get_secret_value()
@@ -30,28 +31,24 @@ async def test_health_ok(client):
     assert r.json() == {"status": "ok", "env": "test", "storage": "neo4j", "neo4j": True}
 
 
-async def test_health_degraded(client, fake_repo):
-    fake_repo.healthy = False
+async def test_health_degraded(client, fake_store):
+    fake_store.healthy = False
     assert (await client.get("/health")).json()["status"] == "degraded"
 
 
-async def test_create_then_list(client):
-    r = await client.post("/items", json={"name": "Castell"})
-    assert r.status_code == 201
-    listed = (await client.get("/items")).json()
-    assert [i["name"] for i in listed] == ["Castell"]
-
-
-async def test_create_rejects_blank(client):
-    assert (await client.post("/items", json={"name": ""})).status_code == 422
-
-
-async def test_ask_uses_agent_tool(client, fake_repo):
-    await client.post("/items", json={"name": "Draig"})
-    r = await client.post("/ask", json={"question": "What items exist?"})
+async def test_ask_answers_from_the_care_home_store(client, fake_store):
+    r = await client.post("/ask", json={"question": "How many care homes are rated Good?"})
     assert r.status_code == 200
     # TestModel calls every tool and echoes the results as its answer.
-    assert "Draig" in r.json()["answer"]
+    answer = r.json()["answer"]
+    total, good = await fake_store.search(Query.of(ratings=["Good"]))
+    assert f'"care_homes":{len(fake_store.homes)}' in answer and f'"Good":{total}' in answer
+    assert '"source":"sample"' in answer
+    assert good and '"homes":[' in answer  # the search tool ran too
+
+
+async def test_ask_rejects_a_blank_question(client):
+    assert (await client.post("/ask", json={"question": ""})).status_code == 422
 
 
 async def test_no_cors_for_unlisted_origin(client):
@@ -96,9 +93,9 @@ def test_memory_storage_runs_the_whole_api_without_neo4j(monkeypatch):
             "storage": "memory",
             "neo4j": False,
         }
-        member = demo_members()[0]
-        password = get_settings().auth_demo_password.get_secret_value()
-        token = c.post("/auth/login", json={"email": member.email, "password": password})
-        headers = {"Authorization": f"Bearer {token.json()['token']}"}
-        assert c.post("/items", json={"name": "Cof"}, headers=headers).status_code == 201
-        assert [i["name"] for i in c.get("/items").json()] == ["Cof"]
+        # With no snapshot on disk the lifespan loads the made-up sample into memory.
+        homes = c.get("/carehomes", params={"postcode": "LS1"}).json()
+        assert homes["dataset"]["source"] == "sample"
+        assert homes["total"] == len(homes["items"]) > 0
+        home = homes["items"][0]
+        assert c.get(f"/carehomes/{home['location_id']}").json() == home

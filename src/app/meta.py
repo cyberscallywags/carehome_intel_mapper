@@ -72,6 +72,7 @@ class Meta(BaseModel):
     mobile: Mobile
     theme: Theme  # [theme.docs] is for the docs build only (scripts/sync_meta.py)
     auth: Auth = Auth()
+    images: dict[str, str] = {}  # file names and alt texts; the files are copied by task sync
 
 
 def package_version() -> str:

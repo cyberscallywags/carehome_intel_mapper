@@ -1,8 +1,8 @@
 """End-to-end checks across every container. Requires `task up` (or the CI compose step)."""
 
+import html
 import os
 from pathlib import Path
-from uuid import uuid4
 
 import httpx
 import pytest
@@ -30,13 +30,8 @@ NEO4J_EDITION = "enterprise" if "enterprise" in neo4j_image() else "community"
 
 
 @pytest.fixture(scope="module")
-def name() -> str:
-    return f"it-{uuid4().hex[:8]}"
-
-
-@pytest.fixture(scope="module")
 def member() -> dict:
-    """Who writes: the first demo member when sign-on is mock, else the local member."""
+    """Who asks the agent: the first demo member when sign-on is mock, else the local member."""
     auth = httpx.get(f"{API}/site").json()["auth"]
     if auth["mode"] != "mock":
         return {"member": {"id": "local"}, "headers": {}}
@@ -51,20 +46,18 @@ def test_api_sees_neo4j():
     assert body["neo4j"] is True, body
 
 
-def test_api_writes_to_neo4j(name, member):
-    r = httpx.post(f"{API}/items", json={"name": name}, headers=member["headers"])
-    assert r.status_code == 201
-    with GraphDatabase.driver(NEO4J_URI, auth=("neo4j", NEO4J_PASSWORD)) as driver:
-        records, _, _ = driver.execute_query(
-            "MATCH (i:Item {name: $name}) RETURN count(i) AS n, i.created_by AS by", name=name
-        )
-    assert (records[0]["n"], records[0]["by"]) == (1, member["member"]["id"])
-
-
-def test_writes_without_a_token_are_refused_when_sign_on_is_mock(member):
+def test_the_agent_needs_a_token_when_sign_on_is_mock(member):
     if not member["headers"]:
         pytest.skip("sign-on is off in this stack")
-    assert httpx.post(f"{API}/items", json={"name": "anonymous"}).status_code == 401
+    assert httpx.post(f"{API}/ask", json={"question": "Any homes?"}).status_code == 401
+    assert httpx.get(f"{API}/carehomes", params={"limit": 1}).status_code == 200  # reads are public
+
+
+def test_sign_on_reaches_the_api_through_the_mobile_proxy(member):
+    if not member["headers"]:
+        pytest.skip("sign-on is off in this stack")
+    me = httpx.get(f"{MOBILE}/api/auth/me", headers=member["headers"])
+    assert me.json() == member["member"]
 
 
 def test_neo4j_edition_matches_the_image():
@@ -73,14 +66,16 @@ def test_neo4j_edition_matches_the_image():
     assert records[0]["edition"] == NEO4J_EDITION
 
 
-def test_ui_renders_item_via_api(name):
+def test_ui_lists_care_homes_from_the_api():
     assert httpx.get(f"{UI}/").status_code == 200
-    assert name in httpx.get(f"{UI}/api/items").text
+    home = httpx.get(f"{API}/carehomes", params={"limit": 1}, timeout=30).json()["items"][0]
+    page = httpx.get(f"{UI}/map", params={"name": home["name"]}, timeout=30).text
+    assert home["name"] in html.unescape(page)
 
 
-def test_agent_answers(member):
-    question = {"question": "What items exist?"}
-    r = httpx.post(f"{API}/ask", json=question, headers=member["headers"], timeout=30)
+def test_agent_answers_about_care_homes(member):
+    question = {"question": "How many care homes are there?"}
+    r = httpx.post(f"{API}/ask", json=question, headers=member["headers"], timeout=60)
     assert r.status_code == 200 and r.json()["answer"]
 
 
@@ -89,7 +84,7 @@ def test_admin_is_up():
 
 
 def test_mobile_serves_app():
-    r = httpx.get(f"{MOBILE}/items")  # deep link falls back to the SPA shell
+    r = httpx.get(f"{MOBILE}/map")  # deep link falls back to the SPA shell
     assert r.status_code == 200 and "<app-root>" in r.text
 
 
@@ -99,18 +94,16 @@ def test_web_and_mobile_share_one_site_manifest():
     assert site["theme"]["primary"] in httpx.get(f"{UI}/").text
 
 
-def test_mobile_proxies_api_to_neo4j(name, member):
+def test_mobile_proxies_api_to_neo4j():
     assert httpx.get(f"{MOBILE}/api/health").json()["neo4j"] is True
-    item = {"name": f"{name}-mobile"}
-    created = httpx.post(f"{MOBILE}/api/items", json=item, headers=member["headers"])
-    assert created.status_code == 201
-    names = [i["name"] for i in httpx.get(f"{API}/items").json()]
-    assert f"{name}-mobile" in names
+    params = {"limit": 5}
+    direct = httpx.get(f"{API}/carehomes", params=params, timeout=30).json()
+    assert httpx.get(f"{MOBILE}/api/carehomes", params=params, timeout=30).json() == direct
 
 
 def test_api_allows_native_app_origin():
     r = httpx.options(
-        f"{API}/items",
+        f"{API}/ask",
         headers={
             "Origin": "capacitor://localhost",
             "Access-Control-Request-Method": "POST",

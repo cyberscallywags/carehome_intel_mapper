@@ -1,4 +1,4 @@
-"""Mock sign-on: login, tokens, the protected writes, and the production guard."""
+"""Mock sign-on: login, tokens, the protected agent, and the production guard."""
 
 from datetime import UTC, datetime, timedelta
 
@@ -13,8 +13,8 @@ from app.config import DEFAULT_AUTH_SECRET, Settings, get_settings
 
 
 @pytest.fixture
-async def client(fake_repo):
-    app.state.repo = fake_repo
+async def client(fake_store):
+    app.state.carehomes = fake_store
     app.state.agent = build_agent("test")
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://api") as c:
@@ -57,16 +57,16 @@ class TestMockSignOn:
         assert r.status_code == 401
         assert r.json()["detail"] == "Wrong email or password"
 
-    async def test_writes_need_a_token(self, client):
-        assert (await client.post("/items", json={"name": "Castell"})).status_code == 401
-        assert (await client.post("/ask", json={"question": "?"})).status_code == 401
-        assert (await client.get("/items")).status_code == 200  # reads stay public
-
-    async def test_items_record_who_added_them(self, client):
+    async def test_asking_the_agent_needs_a_token_but_reading_does_not(self, client):
+        question = {"question": "Which homes are in Leeds?"}
+        r = await client.post("/ask", json=question)
+        assert (r.status_code, r.json()["detail"]) == (401, "Sign in first")
+        assert r.headers["www-authenticate"] == "Bearer"
         token = (await sign_in(client)).json()["token"]
-        r = await client.post("/items", json={"name": "Castell"}, headers=bearer(token))
-        assert r.status_code == 201
-        assert r.json()["created_by"] == first_member().id
+        assert (await client.post("/ask", json=question, headers=bearer(token))).status_code == 200
+        # the map's data stays public
+        assert (await client.get("/carehomes")).status_code == 200
+        assert (await client.get("/carehomes/map")).status_code == 200
 
     async def test_a_tampered_token_is_refused(self, client):
         token = (await sign_in(client)).json()["token"]
@@ -103,8 +103,8 @@ class TestMockSignOn:
 
 async def test_with_sign_on_off_every_request_is_the_local_member(client, monkeypatch):
     monkeypatch.setattr(get_settings(), "auth_mode", "off")
-    r = await client.post("/items", json={"name": "Castell"})
-    assert (r.status_code, r.json()["created_by"]) == (201, auth.LOCAL_MEMBER.id)
+    assert (await client.post("/ask", json={"question": "Any homes?"})).status_code == 200
+    assert (await client.get("/auth/me")).json() == auth.LOCAL_MEMBER.model_dump()
     assert (
         await client.post("/auth/login", json={"email": "a@b.c", "password": "x"})
     ).status_code == 404

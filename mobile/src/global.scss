@@ -35,3 +35,26 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Brand style, from the theme's colours: a secondary-to-tertiary line under every header,
+ * and pill buttons. */
+ion-header {
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, var(--ion-color-secondary), var(--ion-color-tertiary)) 1;
+}
+
+ion-button {
+  --border-radius: 999px;
+}
+
+/* Headings and selected items: the primary colour, or the tertiary where the system's dark
+ * palette would leave a dark primary unreadable. */
+:root {
+  --brand-ink: var(--ion-color-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand-ink: var(--ion-color-tertiary);
+  }
+}

@@ -3,10 +3,8 @@
 
 import os
 import re
-from uuid import uuid4
 
 import pytest
-from neo4j import GraphDatabase
 from playwright.sync_api import Page, expect
 
 from app.content import get_site
@@ -16,19 +14,6 @@ pytestmark = pytest.mark.e2e
 
 UI = os.getenv("UI_URL", "http://localhost:8080")
 ADMIN = os.getenv("ADMIN_URL", "http://localhost:8501")
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "sgaffald-test-only")
-
-
-def items_named(name: str) -> list[dict]:
-    """Read straight from Neo4j, bypassing the API, so the UI cannot fake persistence."""
-    with GraphDatabase.driver(NEO4J_URI, auth=("neo4j", NEO4J_PASSWORD)) as driver:
-        records, _, _ = driver.execute_query(
-            "MATCH (i:Item {name: $name}) "
-            "RETURN i.id AS id, i.created_at AS created_at, i.created_by AS created_by",
-            name=name,
-        )
-    return [r.data() for r in records]
 
 
 @pytest.fixture
@@ -57,17 +42,22 @@ def test_ui_welcome_renders_the_site_manifest(page: Page, page_errors):
     expect(page).to_have_title(re.compile(re.escape(site.brand.name)))
     expect(page.get_by_role("heading", name=site.brand.name)).to_be_visible()
     expect(page.get_by_role("heading", name=get_site().welcome.sections[1].heading)).to_be_visible()
+    hero = page.get_by_role("img", name=get_meta().images["hero_alt"])
+    expect(hero).to_be_visible()
+    assert hero.evaluate("img => img.complete && img.naturalWidth > 0")
     page.get_by_role("link", name="About").click()
     expect(page.get_by_role("heading", name=site.about.title)).to_be_visible()
     assert page_errors == []
 
 
-def test_ui_signed_out_items_page_asks_to_sign_in(page: Page, page_errors):
-    page.goto(f"{UI}/items")
-    expect(page.get_by_text("Sign in to add an item.")).to_be_visible()
-    expect(page.get_by_label("Name")).to_have_count(0)
-    page.get_by_role("button", name="Sign in").click()
+def test_ui_navbar_offers_the_map_and_sign_in_but_no_items(page: Page, page_errors):
+    page.goto(UI)
+    nav = page.get_by_role("navigation")
+    expect(nav.get_by_role("link", name="Map", exact=True)).to_be_visible()
+    expect(nav.get_by_role("link", name="Items")).to_have_count(0)
+    nav.get_by_role("link", name="Sign in").click()
     expect(page).to_have_url(f"{UI}/login")
+    expect(page.get_by_label("Email")).to_be_visible()
     assert page_errors == []
 
 
@@ -95,51 +85,13 @@ def test_ui_one_click_demo_sign_in(page: Page, demo_admin):
     expect(page.get_by_role("link", name=demo_admin.name)).to_be_visible()
 
 
-@pytest.mark.usefixtures("signed_in")
-def test_ui_items_page_renders(page: Page, page_errors):
-    page.goto(f"{UI}/items")
-    expect(page.get_by_label("Name")).to_be_visible()
-    expect(page.get_by_role("columnheader", name="Name")).to_be_visible()
-    expect(page.get_by_role("columnheader", name="Created At")).to_be_visible()
+def test_ui_stays_signed_in_on_the_map_page_and_back(page: Page, signed_in, page_errors):
+    """The map is a page of its own outside FastUI; the session cookie survives the round trip."""
+    page.get_by_role("link", name="Map", exact=True).click()
+    expect(page.locator("#search-menu")).to_be_visible()
+    page.get_by_role("link", name=get_site().welcome.title).click()
+    expect(page.get_by_role("link", name=signed_in.name)).to_be_visible()
     assert page_errors == []
-
-
-def test_ui_form_adds_item_to_table(page: Page, signed_in, page_errors):
-    name = f"e2e-{uuid4().hex[:8]}"
-    assert items_named(name) == []
-    page.goto(f"{UI}/items")
-    page.get_by_label("Name").fill(name)
-    page.get_by_role("button", name="Submit").click()
-    expect(page.get_by_role("cell", name=name)).to_be_visible()
-    # Exactly one node, with the server-generated id the UI redirected to
-    [node] = items_named(name)
-    assert node["id"] and node["created_at"] is not None
-    assert node["created_by"] == signed_in.id
-    expect(page).to_have_url(re.compile(rf"added={node['id']}"))
-    page.reload()
-    expect(page.get_by_role("cell", name=name)).to_be_visible()
-    assert page_errors == []
-
-
-@pytest.mark.usefixtures("signed_in")
-def test_ui_rejected_submit_writes_nothing(page: Page):
-    name = "x" * 201
-    page.goto(f"{UI}/items")
-    page.get_by_label("Name").fill(name)
-    page.get_by_role("button", name="Submit").click()
-    expect(page.get_by_text(re.compile("at most 200 characters"))).to_be_visible()
-    assert items_named(name) == []
-
-
-@pytest.mark.usefixtures("signed_in")
-def test_ui_requires_name(page: Page):
-    page.goto(f"{UI}/items")
-    rows = page.get_by_role("row")
-    expect(rows.first).to_be_visible()
-    before = rows.count()
-    page.get_by_role("button", name="Submit").click()
-    assert page.get_by_label("Name").evaluate("el => !el.validity.valid")
-    expect(rows).to_have_count(before)
 
 
 def sign_in_to_admin(page: Page, email: str, password: str) -> None:
@@ -164,7 +116,8 @@ def test_admin_shows_healthy_stack(page: Page, demo_admin, demo_password):
     )
     expect(main.get_by_text('"neo4j":true')).to_be_visible()
     expect(main.get_by_text('"edition":"')).to_be_visible()  # community or enterprise
-    expect(page.get_by_test_id("stDataFrame")).to_be_visible()
+    expect(main.get_by_role("heading", name="Care homes")).to_be_visible()
+    expect(page.get_by_test_id("stDataFrame")).to_be_visible()  # the care home table
     expect(page.get_by_test_id("stAlert")).to_have_count(0)
 
 

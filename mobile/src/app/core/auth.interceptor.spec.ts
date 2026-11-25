@@ -30,8 +30,8 @@ function setup(signedIn: boolean) {
 describe('authInterceptor', () => {
   it('sends the token to the API', () => {
     const { http, backend } = setup(true);
-    http.get('/api/items').subscribe();
-    expect(backend.expectOne('/api/items').request.headers.get('Authorization')).toBe('Bearer tok');
+    http.get('/api/carehomes').subscribe();
+    expect(backend.expectOne('/api/carehomes').request.headers.get('Authorization')).toBe('Bearer tok');
   });
 
   it('never sends the token anywhere else', () => {
@@ -42,14 +42,14 @@ describe('authInterceptor', () => {
 
   it('sends nothing when signed out', () => {
     const { http, backend } = setup(false);
-    http.get('/api/items').subscribe();
-    expect(backend.expectOne('/api/items').request.headers.has('Authorization')).toBe(false);
+    http.get('/api/carehomes').subscribe();
+    expect(backend.expectOne('/api/carehomes').request.headers.has('Authorization')).toBe(false);
   });
 
   it('signs out and goes to sign-in when the API says the session ended', () => {
     const { http, backend, session: s, navigate } = setup(true);
-    http.post('/api/items', {}).subscribe({ error: () => undefined });
-    backend.expectOne('/api/items').flush({ detail: 'Session expired' }, { status: 401, statusText: '' });
+    http.post('/api/ask', {}).subscribe({ error: () => undefined });
+    backend.expectOne('/api/ask').flush({ detail: 'Session expired' }, { status: 401, statusText: '' });
     expect(s.member()).toBeNull();
     expect(navigate).toHaveBeenCalledWith('/sign-in?returnUrl=%2F');
   });

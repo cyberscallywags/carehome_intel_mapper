@@ -2,27 +2,12 @@
 
 from datetime import UTC, date, datetime
 from typing import Annotated, Literal
-from uuid import uuid4
 
 from pydantic import BaseModel, Field, model_validator
 
 
-class ItemIn(BaseModel):
-    """What a client sends to create an item."""
-
-    name: str = Field(min_length=1, max_length=200, examples=["Castell"])
-
-
-class Item(ItemIn):
-    """A stored item, as returned by the API."""
-
-    id: str = Field(default_factory=lambda: str(uuid4()))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    created_by: str | None = Field(None, description="`id` of the member who added it.")
-
-
 class Health(BaseModel):
-    """API status, where items are stored, and whether Neo4j is reachable."""
+    """API status, where care homes are stored, and whether Neo4j is reachable."""
 
     status: str
     env: str
@@ -173,7 +158,9 @@ class AuthInfo(BaseModel):
 class AskIn(BaseModel):
     """A natural-language question for the agent."""
 
-    question: str = Field(min_length=1, max_length=2000, examples=["What items exist?"])
+    question: str = Field(
+        min_length=1, max_length=2000, examples=["Which care homes in Leeds are rated Outstanding?"]
+    )
 
 
 class AskOut(BaseModel):
@@ -190,9 +177,7 @@ HexColour = Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
 Slug = Annotated[str, Field(pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")]
 
 # Routes the frontends own; a content page may not shadow them.
-RESERVED_SLUGS = frozenset(
-    {"welcome", "about", "items", "map", "sign-in", "login", "logout", "account"}
-)
+RESERVED_SLUGS = frozenset({"welcome", "about", "map", "sign-in", "login", "logout", "account"})
 
 
 class Theme(BaseModel):

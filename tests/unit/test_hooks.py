@@ -21,7 +21,7 @@ def run(script: str, arg: str) -> subprocess.CompletedProcess:
     "message",
     [
         "ADDED: mock sign-on in the API",
-        "FIXED: reject items with an empty name\n\nWith a body.",
+        "FIXED: ignore spaces in a postcode search\n\nWith a body.",
         "# a comment git adds\nDOCS: describe the brand kit",
         "Merge branch 'feature/x'",
         'Revert "ADDED: something"',

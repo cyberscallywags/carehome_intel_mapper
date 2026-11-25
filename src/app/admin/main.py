@@ -87,8 +87,17 @@ with col2:
     except Exception as exc:  # admin page should never crash
         st.error(f"Neo4j unreachable: {exc}")
 
-st.subheader("Items")
+st.subheader("Care homes")
 try:
-    st.dataframe(httpx.get(f"{settings.api_url}/items", timeout=5).json(), width="stretch")
+    page = httpx.get(f"{settings.api_url}/carehomes", params={"limit": 100}, timeout=30).json()
+    if dataset := page.get("dataset"):
+        published = f", published {dataset['as_of']}" if dataset.get("as_of") else ""
+        st.caption(
+            f"{page['total']:,} homes from **{dataset['source']}** ({dataset['name']}{published})"
+        )
+    columns = ["name", "town", "postcode", "rating", "beds", "provider_name", "location_id"]
+    st.dataframe(
+        [{key: home.get(key) for key in columns} for home in page["items"]], width="stretch"
+    )
 except httpx.HTTPError as exc:
     st.error(str(exc))

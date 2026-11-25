@@ -12,6 +12,5 @@ export interface NavEntry {
  */
 export const FEATURES: NavEntry[] = [
   { title: 'Map', path: '/map', icon: 'map-outline' },
-  { title: 'Items', path: '/items', icon: 'list-outline' },
   // new_entity: features (uv run task new_entity adds entries above this line)
 ];

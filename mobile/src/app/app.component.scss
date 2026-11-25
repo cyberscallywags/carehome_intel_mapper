@@ -1,5 +1,13 @@
 ion-menu ion-title.brand {
   cursor: pointer;
+  font-weight: 700;
+
+  img {
+    width: 32px;
+    height: 32px;
+    margin-inline-end: 10px;
+    vertical-align: middle;
+  }
 }
 
 ion-menu ion-item.selected {
@@ -7,11 +15,11 @@ ion-menu ion-item.selected {
   --border-color: var(--ion-color-tertiary);
   --border-width: 0 0 0 3px;
   --border-style: solid;
-  --color: var(--ion-color-primary);
+  --color: var(--brand-ink);
   font-weight: 600;
 
   ion-icon {
-    color: var(--ion-color-primary);
+    color: var(--brand-ink);
   }
 }
 

@@ -5,7 +5,7 @@ UI gives it a page and the docs list its models without further code.
     uv run task new_entity Volunteer              # plural: Volunteers, path /volunteers
     uv run task new_entity Opportunity --plural Opportunities
 
-The entity starts with one field, `name`, like the sample Item: add your fields to its
+The entity starts with one field, `name`: add your fields to its
 `<Name>In` model, then run `uv run task types`. Run it with `uv run`: it regenerates the types
 with the project's own Python.
 """

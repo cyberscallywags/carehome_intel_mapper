@@ -4,7 +4,9 @@
       <ion-header>
         <ion-toolbar color="primary">
           <ion-menu-toggle [autoHide]="false">
-            <ion-title routerLink="/welcome" routerDirection="root" class="brand">{{ site().brand.name }}</ion-title>
+            <ion-title routerLink="/welcome" routerDirection="root" class="brand">
+              <img [src]="mark" alt="" />{{ site().brand.name }}
+            </ion-title>
           </ion-menu-toggle>
         </ion-toolbar>
       </ion-header>

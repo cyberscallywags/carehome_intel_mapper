@@ -20,9 +20,9 @@ def test_every_model_becomes_an_interface():
 
 def test_only_fields_that_default_to_null_are_optional():
     text = typegen.render()
-    assert "  created_by?: string | null;" in text  # Item: None by default
+    assert "  dataset?: CareHomeDataset | null;" in text  # CareHomePage: None by default
     assert "  pages: ContentPage[];" in text  # Site: [] by default, always present
-    assert "  id: string;" in text  # Item: a default factory, always present
+    assert "  loaded_at: string;" in text  # CareHomeDataset: a default factory, always present
 
 
 def test_schema_shapes_map_to_typescript():

@@ -9,13 +9,14 @@ token issuing and the sign-in screens and nothing else. It is a demo, not securi
 `[auth] mode` in `brand/brand.toml` sets the default; the `AUTH_MODE` setting overrides it per
 environment.
 
-| Mode | Who can write | Use it for |
+| Mode | Who counts as a member | Use it for |
 |---|---|---|
 | `mock` | Demo members who sign in with the one `AUTH_DEMO_PASSWORD` (default `demo`) | Demos, screen design, the browser tests |
 | `off` | Everyone: each request is a fixed local member (`local`, role `admin`) | Quick local experiments, the load test |
 
-Reads (`GET /items`, `GET /site`) are public in both modes; writes (`POST /items`,
-`POST /ask`) need a member, and every item records who added it in `created_by`.
+Reads (`GET /carehomes`, the map, `GET /site`) are public in both modes. `POST /ask`, and
+the `POST` of any entity added with `uv run task new_entity`, need a member; an added entity
+records who added it in `created_by`.
 
 ## Demo members
 
@@ -39,7 +40,8 @@ offer one-click "Sign in as…" buttons.
 | Mobile app | **Sign in** in the toolbar or side menu: email and password; a demo member fills in the email | The toolbar shows their initials; they open a popover. The side menu shows name and role | **Sign out** in the popover, the side menu or `/account` |
 | Admin portal | Email and password; only `admin` members get in | The sidebar | **Sign out** in the sidebar |
 
-Signed out, the items forms on the web and mobile offer **Sign in** instead.
+Signed out, the forms of added entities on the web and mobile offer **Sign in** instead, and
+the mobile app's `/account` page sends you to sign in first.
 
 ## How it works
 
@@ -49,8 +51,8 @@ sequenceDiagram
     participant A as API
     F->>A: POST /auth/login {email, password}
     A-->>F: {token, member, expires_at}
-    F->>A: POST /items  Authorization: Bearer <token>
-    A-->>F: 201, created_by = member id (401 without a token)
+    F->>A: POST /ask  Authorization: Bearer <token>
+    A-->>F: 200, the answer (401 without a token)
 ```
 
 | Piece | Where |

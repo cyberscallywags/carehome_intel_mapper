@@ -29,8 +29,6 @@ from app.models import (
     Brand,
     CareHomePage,
     ContentPage,
-    Item,
-    ItemIn,
     LoginIn,
     Member,
     Section,
@@ -134,7 +132,6 @@ def shell(
     links = [nav_link(site.welcome.title, "/")]
     links += [nav_link(p.title, f"/p/{p.slug}") for p in site.pages]
     links.append(nav_link("Map", "/map"))
-    links.append(nav_link("Items", "/items"))
     links += [nav_link(module.TITLE, module.PATH) for module in domain.modules()]
     return [
         c.PageTitle(text=f"{title} · {site.brand.name}"),
@@ -185,8 +182,12 @@ def render_section(section: Section) -> list[AnyComponent]:
 
 
 def render_page(page: ContentPage, brand: Brand | None = None) -> list[AnyComponent]:
-    """With a brand, opens on its name and tagline, like the mobile welcome hero."""
-    out: list[AnyComponent] = [c.Heading(text=brand.name if brand else page.title, level=2)]
+    """With a brand, opens on its hero image, name and tagline, like the mobile welcome page."""
+    out: list[AnyComponent] = []
+    if brand and (hero := static_file("hero")):
+        alt = get_meta().images.get("hero_alt", "")
+        out.append(c.Image(src=hero, alt=alt, width="100%", class_name="brand-hero"))
+    out.append(c.Heading(text=brand.name if brand else page.title, level=2))
     if brand and brand.tagline:
         out.append(c.Paragraph(text=brand.tagline, class_name="lead fw-semibold"))
     if page.summary:
@@ -217,14 +218,30 @@ def theme_css(theme: Theme) -> str:
     return f"""<style>
 :root {{ --brand-primary: {theme.primary}; --brand-secondary: {theme.secondary};
   --brand-tertiary: {theme.tertiary}; --bs-link-color: {theme.primary};
-  --bs-body-font-family: {theme.font_family}; }}
-.navbar {{ background: var(--brand-primary) !important; }}
+  --bs-body-font-family: {theme.font_family};
+  --brand-glow: linear-gradient(90deg, var(--brand-secondary), var(--brand-tertiary));
+  --brand-wash: color-mix(in srgb, var(--brand-tertiary) 30%, #fff);
+  --bs-link-hover-color: {theme.secondary}; }}
+.navbar {{ background: var(--brand-primary) !important; border-bottom: 3px solid;
+  border-image: var(--brand-glow) 1; }}
 .navbar, .navbar a, .navbar .navbar-brand {{ color: #fff !important; }}
+.navbar .navbar-brand {{ font-weight: 700; }}
 .navbar .nav-link.active {{ border-bottom: 2px solid var(--brand-tertiary); }}
+.btn {{ --bs-btn-border-radius: 999px; --bs-btn-padding-x: 1.25rem; --bs-btn-font-weight: 600; }}
 .btn-primary {{ --bs-btn-bg: var(--brand-primary); --bs-btn-border-color: var(--brand-primary);
-  --bs-btn-hover-bg: var(--brand-secondary); --bs-btn-hover-border-color: var(--brand-secondary); }}
-h2, h3 {{ color: var(--brand-primary); }}
-.brand-card {{ border-top: 4px solid var(--brand-tertiary); }}
+  --bs-btn-hover-bg: var(--brand-secondary); --bs-btn-hover-border-color: var(--brand-secondary);
+  --bs-btn-active-bg: var(--brand-secondary);
+  --bs-btn-active-border-color: var(--brand-secondary); }}
+h2, h3 {{ color: var(--brand-primary); font-weight: 700; }}
+.lead.fw-semibold {{ display: inline-block; padding: .6rem 1.4rem; border-radius: 1.75rem;
+  background: var(--brand-wash); color: var(--brand-primary); }}
+.brand-hero {{ display: block; height: auto; margin: 1rem 0 1.5rem; border-radius: 1rem;
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--brand-primary) 14%, transparent); }}
+.brand-card {{ border: 0; border-top: 4px solid var(--brand-tertiary); border-radius: 1rem;
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--brand-primary) 14%, transparent); }}
+.brand-card .card-title {{ color: var(--brand-primary); font-weight: 700; }}
+.form-control:focus, .form-select:focus {{ border-color: var(--brand-secondary);
+  box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--brand-secondary) 25%, transparent); }}
 </style>"""
 
 
@@ -253,53 +270,6 @@ async def content_page(slug: str, token: Token) -> list[AnyComponent]:
     if (page := site.page(slug)) is None:
         raise HTTPException(status_code=404, detail="Page not found")
     return shell(site, page.title, render_page(page), await fetch_member(site, token))
-
-
-@app.get("/api/items", response_model=FastUI, response_model_exclude_none=True)
-async def items_page(token: Token) -> list[AnyComponent]:
-    site = await fetch_site()
-    member = await fetch_member(site, token)
-    async with api() as client:
-        resp = await client.get("/items")
-        resp.raise_for_status()
-    items = [Item.model_validate(i) for i in resp.json()]
-    if can_write(site, member):
-        add: list[AnyComponent] = [
-            c.Paragraph(text="Add an item; it is stored in Neo4j via the API."),
-            c.ModelForm(model=ItemIn, submit_url="/api/items"),
-        ]
-    else:
-        add = [
-            c.Paragraph(text="Sign in to add an item."),
-            c.Button(text="Sign in", on_click=GoToEvent(url="/login")),
-        ]
-    return shell(
-        site,
-        "Items",
-        [
-            c.Heading(text="Items", level=2),
-            *add,
-            c.Table(
-                data=items,
-                data_model=Item,
-                columns=[DisplayLookup(field="name"), DisplayLookup(field="created_at")],
-            ),
-        ],
-        member,
-    )
-
-
-@app.post("/api/items", response_model=FastUI, response_model_exclude_none=True)
-async def create_item(
-    form: Annotated[ItemIn, fastui_form(ItemIn)], token: Token
-) -> list[AnyComponent]:
-    async with api(token) as client:
-        resp = await client.post("/items", json=form.model_dump())
-    if resp.status_code == 401:
-        return [c.FireEvent(event=GoToEvent(url="/login"))]
-    resp.raise_for_status()
-    # A unique query string makes FastUI refetch the page; GoToEvent to the current URL is a no-op.
-    return [c.FireEvent(event=GoToEvent(url="/items", query={"added": resp.json()["id"]}))]
 
 
 # ---------------------------------------------------------------- sign-on
@@ -338,7 +308,9 @@ async def sign_in(response: Response, email: str, password: str) -> list[AnyComp
 async def login_page(token: Token) -> list[AnyComponent]:
     site = await fetch_site()
     if not site.auth or site.auth.mode != "mock":
-        body: list[AnyComponent] = [c.Paragraph(text="Sign-on is off: everyone can add items.")]
+        body: list[AnyComponent] = [
+            c.Paragraph(text="Sign-on is off: there is nothing to sign in to.")
+        ]
     else:
         demo = [
             c.Button(
@@ -469,7 +441,9 @@ async def map_page(request: Request) -> HTMLResponse:
     resp.raise_for_status()
     page = CareHomePage.model_validate(resp.json())
     focus = request.query_params.get("focus", "")
-    return HTMLResponse(mappage.render(site, params, page, static_file("favicon"), focus))
+    return HTMLResponse(
+        mappage.render(site, params, page, static_file("favicon"), focus, mark=static_file("mark"))
+    )
 
 
 @app.get("/map/frame", response_class=HTMLResponse)

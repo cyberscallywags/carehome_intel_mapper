@@ -93,6 +93,7 @@ def sample_snapshot() -> Snapshot:
 class CareHomeStore(Protocol):
     """What the API needs from care home storage."""
 
+    async def ping(self) -> bool: ...
     async def replace(self, snapshot: Snapshot) -> None: ...
     async def dataset(self) -> CareHomeDataset | None: ...
     async def search(
@@ -108,6 +109,9 @@ class MemoryCareHomeStore:
     homes: list[CareHome] = field(default_factory=list)
     info: CareHomeDataset | None = None
     keys: dict[str, dict[str, str]] = field(default_factory=dict)
+
+    async def ping(self) -> bool:
+        return True
 
     async def replace(self, snapshot: Snapshot) -> None:
         self.homes = sorted(snapshot.homes, key=lambda home: (home.name.lower(), home.location_id))
@@ -152,6 +156,14 @@ class Neo4jCareHomeStore:
     def __init__(self, driver: AsyncDriver, database: str = "neo4j") -> None:
         self.driver = driver
         self.database = database
+
+    async def ping(self) -> bool:
+        """Whether Neo4j answers."""
+        try:
+            await self.driver.verify_connectivity()
+        except Exception:
+            return False
+        return True
 
     async def run(self, query: str, **params: Any) -> list[Any]:
         records, _, _ = await self.driver.execute_query(query, params, database_=self.database)

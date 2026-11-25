@@ -22,6 +22,7 @@ import {
 } from '@ionic/angular';
 
 import { iconName } from './core/icons';
+import meta from './core/meta.json';
 import { SessionService } from './core/session.service';
 import { SiteStore } from './core/site.store';
 import { FEATURES, NavEntry } from './features';
@@ -57,6 +58,8 @@ export class AppComponent {
   private readonly store = inject(SiteStore);
   protected readonly session = inject(SessionService);
   protected readonly iconName = iconName;
+  /** The brand mark, copied into assets/brand by `uv run task sync`. */
+  protected readonly mark = meta.mark;
 
   readonly site = this.store.site;
 

@@ -38,8 +38,8 @@ To try the template or work on a screen, run just the API and the web UI on your
 uv run task dev       # API on :8000/docs and web UI on :8080, live reload, Ctrl+C to stop
 ```
 
-Items live in memory (`STORAGE=memory`) and are gone when you stop; sign in as a demo member
-(password `demo`) to add one. The mobile app, the admin portal and the docs need
+Care homes are held in memory (`STORAGE=memory`): the made-up sample, or `data/carehomes.json`
+once `uv run task ingest` has written it. Sign in as a demo member with the password `demo`. The mobile app, the admin portal and the docs need
 `uv run task up`.
 
 ## Where everything lives

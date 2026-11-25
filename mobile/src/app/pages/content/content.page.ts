@@ -10,6 +10,7 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 
+import meta from '../../core/meta.json';
 import { SiteStore } from '../../core/site.store';
 import { SectionsComponent } from '../../shared/sections.component';
 
@@ -38,6 +39,12 @@ import { AccountMenuComponent } from '../../shared/account-menu.component';
 })
 export class ContentPage {
   private readonly store = inject(SiteStore);
+
+  /** The brand mark, copied into assets/brand by `uv run task sync`. */
+  protected readonly mark = meta.mark;
+  /** The brand hero, if it has one: shown above the welcome page in place of the mark. */
+  protected readonly hero = meta.hero;
+  protected readonly heroAlt = meta.hero_alt;
 
   readonly slug = input.required<string>();
   readonly brand = computed(() => this.store.site().brand);

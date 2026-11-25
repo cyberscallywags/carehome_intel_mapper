@@ -48,7 +48,7 @@ branch after the kind of work, followed by a lower-case name (`a-z`, `0-9`, `.`,
 | Issue | Branch | Commit prefix |
 |---|---|---|
 | Feature | `feature/add-login` | `ADDED:` |
-| Bug | `bug/empty-item-name` | `FIXED:` |
+| Bug | `bug/postcode-search-spaces` | `FIXED:` |
 | Task | `task/…`, `docs/…` or `refactor/…` | `TASK:`, `DOCS:` or `REFACTOR:` |
 
 ```bash
@@ -62,7 +62,7 @@ branch check lets those through.
 ## 3. Commit
 
 Write commit messages as `PREFIX: what changed`, in the present tense, using the prefix from
-the table above, e.g. `FIXED: reject items with an empty name`. The `commit-msg` hook refuses a
+the table above, e.g. `FIXED: ignore spaces in a postcode search`. The `commit-msg` hook refuses a
 message without one (merge, revert and `fixup!` commits pass), and the changelog is built from
 the prefixes: `uv run task changelog` regenerates `CHANGELOG.md`, and each release's notes on
 GitHub come from the same commits (`cliff.toml`).
@@ -93,7 +93,7 @@ that touches more than one service:
 
 | When | Task | Does |
 |---|---|---|
-| while coding | `uv run task dev` | the API and web UI with live reload, items in memory, no Docker |
+| while coding | `uv run task dev` | the API and web UI with live reload, care homes in memory, no Docker |
 | | `uv run task watch` | re-runs the unit tests on every save |
 | after changing the models | `uv run task types` | regenerates the mobile app's TypeScript types |
 | after changing `brand/` | `uv run task sync` | checks the brand and rewrites its copies |

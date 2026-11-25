@@ -19,24 +19,32 @@ CSS = """
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body { display: flex; flex-direction: column; font-family: var(--font); color: #1f2933;
-  background: #fff; }
+  background: #fff; --glow: linear-gradient(90deg, var(--secondary), var(--tertiary));
+  --wash: color-mix(in srgb, var(--tertiary) 30%, #fff); }
 a { color: var(--primary); }
+a:hover { color: var(--secondary); }
 :focus-visible { outline: 3px solid var(--tertiary); outline-offset: 2px; }
 .bar { display: flex; align-items: center; gap: 1rem; padding: .5rem 1rem; min-height: 3.25rem;
-  background: var(--primary); color: #fff; }
-.bar a { color: #fff; text-decoration: none; }
-.bar .brand { font-weight: 600; font-size: 1.15rem; margin-right: auto; }
+  background: var(--primary); color: #fff; border-bottom: 3px solid;
+  border-image: var(--glow) 1; }
+.bar a, .bar a:hover { color: #fff; text-decoration: none; }
+.bar .brand { display: flex; align-items: center; gap: .5rem; font-weight: 700;
+  font-size: 1.15rem; margin-right: auto; }
+.bar .brand img { width: 1.75rem; height: 1.75rem; }
 .bar nav { display: flex; gap: 1rem; }
 .bar nav a[aria-current] { border-bottom: 2px solid var(--tertiary); }
-.menu-toggle { display: none; padding: .4rem .75rem; border: 1px solid #fff; border-radius: 6px;
+.menu-toggle { display: none; padding: .4rem .9rem; border: 1px solid #fff; border-radius: 999px;
   font-weight: 600; }
 .layout { flex: 1; display: flex; min-height: 0; position: relative; }
 .menu { width: 21rem; flex: none; overflow-y: auto; padding: 1rem; background: #fff;
   border-right: 1px solid #d5dbe1; }
-.menu h1 { font-size: 1.2rem; margin: 0 0 .75rem; color: var(--primary); }
+.menu h1 { display: inline-block; font-size: 1.15rem; margin: 0 0 .5rem; padding: .45rem 1rem;
+  border-radius: 999px; color: var(--primary); background: var(--wash); }
 .menu label { display: block; font-weight: 600; margin: .75rem 0 .25rem; }
 .menu input[type=text] { width: 100%; padding: .5rem .6rem; font: inherit;
-  border: 1px solid #7b8794; border-radius: 6px; }
+  border: 1px solid #7b8794; border-radius: 8px; }
+.menu input[type=text]:focus { border-color: var(--secondary); }
+.menu input[type=checkbox] { accent-color: var(--secondary); }
 .menu .hint { display: block; font-weight: 400; font-size: .85rem; color: #52606d; }
 .menu fieldset { border: 0; padding: 0; margin: .75rem 0 0; }
 .menu legend { font-weight: 600; padding: 0; margin-bottom: .25rem; }
@@ -44,7 +52,7 @@ a { color: var(--primary); }
 .menu .check input { width: 1.1rem; height: 1.1rem; }
 .actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
 .actions button { padding: .55rem 1.25rem; font: inherit; font-weight: 600; color: #fff;
-  background: var(--primary); border: 0; border-radius: 6px; cursor: pointer; }
+  background: var(--primary); border: 0; border-radius: 999px; cursor: pointer; }
 .actions button:hover { background: var(--secondary); }
 .count { font-weight: 600; margin: 1.25rem 0 .5rem; }
 .results { list-style: none; margin: 0; padding: 0; }
@@ -135,9 +143,11 @@ def render(
     page: CareHomePage,
     icon: str | None = None,
     focus: str = "",
+    mark: str | None = None,
 ) -> str:
-    """The whole page. `params` are the current search fields, `page` the API's matches, and
-    `focus` the `location_id` of a home the map should open on."""
+    """The whole page. `params` are the current search fields, `page` the API's matches,
+    `focus` the `location_id` of a home the map should open on, and `icon` and `mark` the
+    URLs of the brand's favicon and mark."""
     value = {k: v for k, v in params if k != "rating"}
     chosen = {v for k, v in params if k == "rating"}
     query = urlencode([*params, *([("focus", focus)] if focus else [])])
@@ -171,6 +181,7 @@ def render(
     )
     homes = "care home" if page.total == 1 else "care homes"
     favicon = f'<link rel="icon" href="{escape(icon)}">' if icon else ""
+    logo = f'<img src="{escape(mark)}" alt="">' if mark else ""
     theme = site.theme
     return f"""<!doctype html>
 <html lang="en">
@@ -187,7 +198,7 @@ def render(
 <header class="bar">
   <a class="menu-toggle" id="menu-toggle" href="#search-menu" role="button"
      aria-controls="search-menu" aria-expanded="false">Search</a>
-  <a class="brand" href="/">{name}</a>
+  <a class="brand" href="/">{logo}{name}</a>
   <nav aria-label="Site">
     <a href="/">{escape(site.welcome.title)}</a>
     <a href="/map" aria-current="page">Map</a>

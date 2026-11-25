@@ -31,8 +31,8 @@ regulator's view of the homes in an area without reading a spreadsheet.
 | Search, storage | `src/app/carehomes/store.py` | `(:CareHome)` nodes in Neo4j, or a list in memory with `STORAGE=memory`. |
 | The map | `src/app/carehomes/mapview.py` | A Folium page served by the API at `GET /carehomes/map`. |
 
-The template's sample `Item` is still in place; it can be removed as described in
-[Make it yours](../handbook/make-it-yours.md).
+The template's sample `Item` has been removed: care homes are the only domain, and
+`POST /ask` answers questions about them.
 
 ## Decisions
 

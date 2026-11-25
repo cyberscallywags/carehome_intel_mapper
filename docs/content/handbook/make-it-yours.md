@@ -97,17 +97,6 @@ the web UI gives it a page and a navbar link, the mobile app a page and a menu e
 docs and the mobile app's types list its models. It starts with one field, `name`: add yours to
 `<Name>In`, run `uv run task types`, then `uv run task test` and `uv run task test_mobile`.
 
-The sample `Item` predates the scaffold and lives in the shared files. Once the project's own
-entities exist, remove it from:
-
-- `models.py`: `Item` / `ItemIn`
-- `db.py`: `ItemRepo`
-- `api/main.py`: the `/items` routes
-- `admin/main.py`
-- `ui/main.py`
-- `mobile/src/app/core/api.service.ts` (its methods), `mobile/src/app/pages/items/` and
-  `mobile/src/app/features.ts`
-
 Run `uv run task types` after changing the models: it regenerates the mobile app's types
 (`api.types.ts`), and the pre-commit hook refuses a stale copy. The tests show the pattern for
 each layer.

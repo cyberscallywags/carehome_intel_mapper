@@ -11,7 +11,7 @@ Capacitor 8. It talks to the API only, through `ApiService`
 ```text
 src/app/
   app.component.*        shell: split pane + side menu (sign-on, pages, About, Docs)
-  app.routes.ts          welcome, about, p/:slug, items, sign-in, account
+  app.routes.ts          welcome, about, p/:slug, map, sign-in, account
   features.ts            code-backed screens listed after the manifest pages
   core/
     api.service.ts       HTTP to the API; re-exports the generated types
@@ -23,7 +23,7 @@ src/app/
   shared/sections.*      renders manifest sections (text, list, steps, cards)
   pages/
     content/             one template for welcome, about and every /p/<slug> page
-    items/               the item form and list
+    map/                 the care home map and its search menu
     sign-in/             the sign-on form
 ```
 
@@ -48,7 +48,7 @@ src/app/
 | `core/auth.guard.ts` | Keeps signed-out visitors off member-only routes, such as `/account` |
 | `shared/account-menu.component.ts` | The toolbar's initials button and its popover: who is signed in, Account, Sign out |
 
-The side menu shows the member's name, email and role. The items page shows its form only to
+The side menu shows the member's name, email and role. The page of an added entity shows its form only to
 members. With sign-on off, none of the sign-on screens show. See [Sign-on](../sign-on.md).
 
 ## Building and running

@@ -21,7 +21,7 @@ reads every environment variable.
 | Adds | Files |
 |---|---|
 | Project and tools | `pyproject.toml` (uv, ruff, pytest, taskipy), `.python-version` |
-| Models | `src/app/models.py`: `ItemIn`, `Item`, `Health` |
+| Models | `src/app/models.py`: `Health`, then the domain's own (here `CareHome`) |
 | Settings | `src/app/config.py` |
 | Tests | `tests/unit/test_config.py` |
 
@@ -34,8 +34,8 @@ as the Neo4j one to come, so the API runs before any database exists.
 
 | Adds | Files |
 |---|---|
-| Routes | `src/app/api/main.py`: `GET /health`, `POST /items`, `GET /items` |
-| Repository | `MemoryItemRepo` in `src/app/db.py` (the unit tests' `FakeRepo` builds on it) |
+| Routes | `src/app/api/main.py`: `GET /health`; `src/app/carehomes/routes.py`: `GET /carehomes` |
+| Store | `MemoryCareHomeStore` in `src/app/carehomes/store.py` (the unit tests' `FakeStore` builds on it) |
 | Tests | `tests/unit/test_api.py`, driving the app in-process |
 
 **Check:** `uv run task test`, then `STORAGE=memory uv run uvicorn app.api.main:app` and open
@@ -79,7 +79,7 @@ one dependency that every write asks for.
 | Members | `brand/content/users.json` |
 | Tests | `tests/unit/test_auth.py` |
 
-**Check:** `uv run task test`; then, with `AUTH_MODE=mock`, `POST /items` without a token
+**Check:** `uv run task test`; then, with `AUTH_MODE=mock`, `POST /ask` without a token
 returns 401. See [Sign-on](sign-on.md).
 
 ## 6. The mobile app
@@ -89,7 +89,7 @@ nobody needs Node installed.
 
 | Adds | Files |
 |---|---|
-| App | `mobile/`: the side menu, content and items pages, `ApiService`, the theme maths |
+| App | `mobile/`: the side menu, content and map pages, `ApiService`, the theme maths |
 | Image | `docker/mobile.Dockerfile` (lint, unit tests, build), `docker/mobile.nginx.conf` (proxies `/api`) |
 | Tests | the `*.spec.ts` files, `tests/e2e/test_mobile.py` on an emulated phone |
 
@@ -97,7 +97,7 @@ nobody needs Node installed.
 
 ## 7. Admin and AI
 
-An operator portal that reads Neo4j directly, and a Pydantic AI agent with one tool.
+An operator portal that reads Neo4j directly, and a Pydantic AI agent with its tools.
 
 | Adds | Files |
 |---|---|

@@ -10,9 +10,12 @@
     "collective": "Cyber Scallywags",
     "collective_url": null
   },
+  "mark": "assets/brand/mark.png",
+  "hero": "assets/brand/hero.webp",
+  "hero_alt": "Carehome Intel: find, explore and compare care homes across England, on a map, with clear ratings from publicly available CQC data",
   "theme": {
-    "primary": "#264653",
-    "secondary": "#2a9d8f",
-    "tertiary": "#e9c46a"
+    "primary": "#04283a",
+    "secondary": "#197e89",
+    "tertiary": "#77c767"
   }
 }

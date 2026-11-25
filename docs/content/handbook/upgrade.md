@@ -33,7 +33,7 @@ The template and the project own different files:
 
 | Owned by | Files |
 |---|---|
-| The project | `brand/`, `docs/content/project/`, the domain code you replaced `Item` with |
+| The project | `brand/`, `docs/content/project/`, the domain code (here `src/app/carehomes/`) |
 | The template | everything else, including this handbook and `scripts/sync_meta.py` |
 | Generated | the copies `uv run task sync` writes; regenerate them instead of merging them |
 

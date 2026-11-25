@@ -9,8 +9,9 @@ reference.
 |---|---|
 | `GET /health` | Liveness and Neo4j reachability; `degraded` when the graph is down |
 | `GET /site` | The [site manifest](../site-manifest.md) for the web and mobile frontends |
-| `GET /items`, `POST /items` | The example domain: items stored in Neo4j; adding one needs a signed-in member |
-| `POST /ask` | A Pydantic AI agent that can read items from the graph; needs a signed-in member |
+| `GET /carehomes`, `GET /carehomes/{location_id}` | Search the care homes, and read one |
+| `GET /carehomes/map` | The Folium map of a search, which both frontends show in a frame |
+| `POST /ask` | A Pydantic AI agent that answers questions by searching the care homes; needs a signed-in member |
 | `POST /auth/login`, `GET /auth/me` | Mock sign-on: a bearer token for a demo member, and who a token belongs to |
 
 ## Sign-on
@@ -30,15 +31,18 @@ them, and `POST /<plural>` adds one for the signed-in member. With no Neo4j driv
 
 ## Graph access
 
-`app.db.ItemRepo` wraps the async Neo4j driver. On start-up the API pings Neo4j and
-creates a uniqueness constraint on `Item.id`. With `STORAGE=memory` it uses
-`MemoryItemRepo` instead, which needs no database (`uv run task dev` does this); both satisfy
-the `ItemStore` protocol, and `GET /health` says which is in use. Swap them and the `Item`
-models for your own domain; the unit tests' `FakeRepo` builds on `MemoryItemRepo`.
+`app.db.make_driver` opens the async Neo4j driver, and `app.carehomes.store` keeps the care
+homes: `Neo4jCareHomeStore` as `(:CareHome)` nodes, or `MemoryCareHomeStore` with
+`STORAGE=memory`, which needs no database (`uv run task dev` does this). Both satisfy the
+`CareHomeStore` protocol, and `GET /health` says which is in use and whether it answers. On
+start-up the API loads the snapshot written by `uv run task ingest`, or the made-up sample when
+there is none. The unit tests' `FakeStore` builds on `MemoryCareHomeStore`.
 
 ## The agent
 
-`app.agent.build_agent` builds a Pydantic AI agent with one tool, `list_item_names`.
+`app.agent.build_agent` builds a Pydantic AI agent with two tools over the care home store:
+`dataset_summary` (where the data came from and how many homes hold each rating) and
+`search_care_homes` (the same name, location and postcode search as `GET /carehomes`).
 `LLM_MODEL=test` selects the offline `TestModel`, which calls every tool and echoes the
 results, so tests need no API key. For a real model see [Configuration](../../reference/configuration.md).
 

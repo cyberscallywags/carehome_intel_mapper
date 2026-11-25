@@ -1,7 +1,7 @@
 """Entities added with `uv run task new_entity <Name>`: one module each, holding the entity's
 models, storage and routes. The API includes every module's `router`, the web UI gives each a
 page (`TITLE`, `PATH`, `MODEL`, `MODEL_IN`), and the docs and the mobile app's types include its
-models. The sample `Item` predates this package and lives in app.models, app.db and the API."""
+models."""
 
 import importlib
 import pkgutil

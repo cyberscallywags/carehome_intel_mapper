@@ -1,6 +1,6 @@
 h2 {
   margin-top: 24px;
-  color: var(--ion-color-primary);
+  color: var(--brand-ink);
 }
 
 .cards {
@@ -11,6 +11,7 @@ h2 {
 
 ion-card {
   border-top: 4px solid var(--ion-color-tertiary);
+  border-radius: 16px;
 }
 
 ion-card-header ion-icon {

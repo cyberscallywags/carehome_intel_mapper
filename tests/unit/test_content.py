@@ -42,7 +42,7 @@ def test_page_lookup_by_slug():
     assert site.page("missing") is None
 
 
-@pytest.mark.parametrize("slug", ["about", "items", "sign-in", "welcome"])
+@pytest.mark.parametrize("slug", ["about", "map", "sign-in", "welcome"])
 def test_pages_cannot_shadow_app_routes(slug):
     data = served()
     data["pages"][0]["slug"] = slug

@@ -61,7 +61,7 @@ byte for byte, to a fixed name, `assets/brand/<key>.<ext>`, in each place that s
 | `mark` | yes | square; PNG at least 128×128, or SVG | docs (logo), web UI navbar, mobile |
 | `favicon` | yes | PNG at least 32×32, or SVG | docs, web UI, mobile |
 | `logo` | no | any size | docs, mobile |
-| `hero` | no | needs `hero_alt` | README banner, docs |
+| `hero` | no | needs `hero_alt` | README banner, docs, web UI and mobile welcome page |
 | `crest` | no | needs `crest_alt` | docs home, manual, about page |
 | `app_icon` | no | PNG exactly 1024×1024 | mobile (`@capacitor/assets` source) |
 | `splash` | no | PNG exactly 2732×2732 | mobile (`@capacitor/assets` source) |
