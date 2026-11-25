@@ -1,6 +1,7 @@
 import httpx
 import pytest
 
+from app import domain
 from app.api.main import app as api_app
 from app.content import get_site
 from app.meta import get_meta
@@ -72,10 +73,13 @@ async def test_content_page_by_slug(ui_client):
     assert (await ui_client.get("/api/p/nope")).status_code == 404
 
 
-async def test_navbar_lists_the_pages_then_the_map(ui_client):
+async def test_navbar_lists_the_pages_the_map_then_any_added_entity(ui_client):
     navbar = next(c for c in (await ui_client.get("/api/")).json() if c["type"] == "Navbar")
     urls = [link["onClick"]["url"] for link in navbar["startLinks"]]
-    assert urls == ["/", *(f"/p/{p.slug}" for p in get_site().pages), "/map"]
+    pages = [f"/p/{p.slug}" for p in get_site().pages]
+    # entities added with `uv run task new_entity` follow (the template smoke test adds one)
+    assert urls == ["/", *pages, "/map", *(m.PATH for m in domain.modules())]
+    assert "/items" not in urls
 
 
 async def test_welcome_opens_on_the_brand_hero(ui_client):
